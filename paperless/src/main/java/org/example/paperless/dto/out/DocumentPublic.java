@@ -1,4 +1,4 @@
-package org.example.paperless.dto;
+package org.example.paperless.dto.out;
 import lombok.Data;
 import org.example.paperless.model.DocumentType;
 
