@@ -27,4 +27,5 @@ public class Reminder {
 
     @Column(nullable = false)
     private boolean notified = false;
+
 }

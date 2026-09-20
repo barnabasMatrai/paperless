@@ -3,6 +3,7 @@ package org.example.paperless.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.paperless.model.DocumentType;
 
 import java.time.LocalDateTime;
 
@@ -17,14 +18,15 @@ public class Document
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DocumentType documentType;
+
     @Column(nullable = false)
     private String filename;
 
     @Column(nullable = false)
     private LocalDateTime uploadDate = LocalDateTime.now();
-
-    @Column(nullable = false)
-    private Integer documentType;
 
     @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private Reminder reminder;
