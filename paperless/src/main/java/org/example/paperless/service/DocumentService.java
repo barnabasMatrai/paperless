@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 
 @Service
 public class DocumentService {
+
     private final DocumentRepository documentRepository;
 
     public DocumentService(DocumentRepository documentRepository) {
@@ -21,15 +22,21 @@ public class DocumentService {
 
     public Document findById(Long id) {
         return documentRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Document not found: " + id));
+                .orElseThrow(() ->
+                        new NoSuchElementException("Document not found: " + id));
     }
 
     public Document save(Document document) {
-        // Rückreferenz setzen, sonst schlägt der NOT NULL-Constraint auf document_id fehl
-        if (document.getReminder() != null) {
-            document.getReminder().setDocument(document);
-        }
         return documentRepository.save(document);
+    }
+
+    public Document update(Long id, Document updatedDocument) {
+        Document existingDocument = findById(id);
+
+        existingDocument.setDocumentType(updatedDocument.getDocumentType());
+        existingDocument.setFilename(updatedDocument.getFilename());
+
+        return documentRepository.save(existingDocument);
     }
 
     public void deleteById(Long id) {

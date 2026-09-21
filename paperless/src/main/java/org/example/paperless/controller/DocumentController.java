@@ -8,10 +8,8 @@ import org.example.paperless.entity.Document;
 import org.example.paperless.mapper.DocumentMapper;
 import org.example.paperless.service.DocumentService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -38,6 +36,12 @@ public class DocumentController {
     public DocumentPublic create(@Valid @RequestBody DocumentCreate documentIn) {
         Document saved = documentService.save(documentMapper.toEntity(documentIn));
         return documentMapper.toObject(saved);
+    }
+
+    @PutMapping("/{id}")
+    public DocumentPublic update(@PathVariable Long id, @Valid @RequestBody DocumentCreate documentIn) {
+        Document updated = documentService.update(id, documentMapper.toEntity(documentIn));
+        return documentMapper.toObject(updated);
     }
 
     @DeleteMapping("/{id}")
