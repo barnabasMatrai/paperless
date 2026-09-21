@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:17
+    container_name: paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    ports:
+      - "5432:5432"
+    volumes:
+      - paperless-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperless -d paperless"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: paperless-rest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: paperless
+      DB_USER: paperless
+      DB_PASSWORD: paperless
+    ports:
+      - "8081:8081"
+
+volumes:
+  paperless-db-data:
