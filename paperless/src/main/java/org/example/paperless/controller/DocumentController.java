@@ -35,16 +35,14 @@ public class DocumentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<DocumentPublic> create(@Valid @RequestBody DocumentCreate documentIn) {
+    public DocumentPublic create(@Valid @RequestBody DocumentCreate documentIn) {
         Document saved = documentService.save(documentMapper.toEntity(documentIn));
-        DocumentPublic result = documentMapper.toObject(saved);
-        return ResponseEntity.created(URI.create("/api/documents/" + result.getId())).body(result);
+        return documentMapper.toObject(saved);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public void delete(@PathVariable Long id) {
         documentService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
