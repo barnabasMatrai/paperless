@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import org.example.paperless.dto.in.DocumentCreate;
 import org.example.paperless.dto.out.DocumentPublic;
 import org.example.paperless.entity.Document;
-import org.example.paperless.mapper.DocumentMapper;
-import org.example.paperless.service.DocumentService;
+import org.example.paperless.mapper.IDocumentMapper;
+import org.example.paperless.service.IDocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/documents")
 public class DocumentController {
-    private final DocumentService documentService;
-    private final DocumentMapper documentMapper;
+    private final IDocumentService documentService;
+    private final IDocumentMapper documentMapper;
 
     @GetMapping
     public List<DocumentPublic> getAll() {

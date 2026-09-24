@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ReminderRepository extends JpaRepository<Reminder, Long> {
+public interface IReminderRepository extends JpaRepository<Reminder, Long> {
     Optional<Reminder> findByDocumentId(Long documentId);
 }

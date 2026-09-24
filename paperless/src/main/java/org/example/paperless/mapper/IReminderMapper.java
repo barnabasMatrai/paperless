@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface ReminderMapper {
+public interface IReminderMapper {
     Reminder toEntity(ReminderCreate reminderIn);
     ReminderPublic toObject(Reminder reminder);
 }

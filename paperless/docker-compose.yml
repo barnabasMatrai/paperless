@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: paperless
       POSTGRES_PASSWORD: paperless
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - paperless-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -33,7 +33,7 @@ services:
       DB_USER: paperless
       DB_PASSWORD: paperless
     ports:
-      - "8081:8081"
+      - "8081:8080"
 
 volumes:
   paperless-db-data:

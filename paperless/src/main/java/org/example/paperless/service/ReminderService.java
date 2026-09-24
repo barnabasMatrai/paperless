@@ -2,22 +2,22 @@ package org.example.paperless.service;
 
 import org.example.paperless.entity.Document;
 import org.example.paperless.entity.Reminder;
-import org.example.paperless.repository.DocumentRepository;
-import org.example.paperless.repository.ReminderRepository;
+import org.example.paperless.repository.IDocumentRepository;
+import org.example.paperless.repository.IReminderRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class ReminderService {
+public class ReminderService implements IReminderService {
 
-    private final ReminderRepository reminderRepository;
-    private final DocumentRepository documentRepository;
+    private final IReminderRepository reminderRepository;
+    private final IDocumentRepository documentRepository;
 
     public ReminderService(
-            ReminderRepository reminderRepository,
-            DocumentRepository documentRepository) {
+            IReminderRepository reminderRepository,
+            IDocumentRepository documentRepository) {
         this.reminderRepository = reminderRepository;
         this.documentRepository = documentRepository;
     }

@@ -7,8 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = ReminderMapper.class)
-public interface DocumentMapper {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = IReminderMapper.class)
+public interface IDocumentMapper {
 
     @Mapping(source = "type", target = "documentType")
     Document toEntity(DocumentCreate documentIn);

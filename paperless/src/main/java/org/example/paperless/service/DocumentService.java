@@ -1,18 +1,18 @@
 package org.example.paperless.service;
 
 import org.example.paperless.entity.Document;
-import org.example.paperless.repository.DocumentRepository;
+import org.example.paperless.repository.IDocumentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class DocumentService {
+public class DocumentService implements IDocumentService {
 
-    private final DocumentRepository documentRepository;
+    private final IDocumentRepository documentRepository;
 
-    public DocumentService(DocumentRepository documentRepository) {
+    public DocumentService(IDocumentRepository documentRepository) {
         this.documentRepository = documentRepository;
     }
 

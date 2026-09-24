@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import org.example.paperless.dto.in.ReminderCreate;
 import org.example.paperless.dto.out.ReminderPublic;
 import org.example.paperless.entity.Reminder;
-import org.example.paperless.mapper.ReminderMapper;
-import org.example.paperless.service.ReminderService;
+import org.example.paperless.mapper.IReminderMapper;
+import org.example.paperless.service.IReminderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/documents/{documentId}/reminder")
 public class ReminderController {
 
-    private final ReminderService reminderService;
-    private final ReminderMapper reminderMapper;
+    private final IReminderService reminderService;
+    private final IReminderMapper reminderMapper;
 
     @GetMapping
     public ReminderPublic get(@PathVariable Long documentId) {
