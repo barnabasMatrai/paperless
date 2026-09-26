@@ -17,23 +17,5 @@ services:
       timeout: 5s
       retries: 10
 
-  rest:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: paperless-rest
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: paperless
-      DB_USER: paperless
-      DB_PASSWORD: paperless
-    ports:
-      - "8081:8080"
-
 volumes:
   paperless-db-data:
