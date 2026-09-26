@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    ports:
+      - "5433:5432"
+    volumes:
+      - paperless-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperless -d paperless"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  paperless-db-data:
