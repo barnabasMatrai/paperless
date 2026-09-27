@@ -30,4 +30,12 @@ public class GlobalExceptionHandler {
 
         return errors;
     }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleUsernameAlreadyExists(
+            UsernameAlreadyExistsException exception) {
+
+        return Map.of("error", exception.getMessage());
+    }
 }

@@ -1,9 +1,9 @@
 package at.technikum.paperless.entity;
 
+import at.technikum.paperless.model.DocumentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import at.technikum.paperless.model.DocumentType;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "documents")
 @Getter
 @Setter
+public class Document {
 
-public class Document
-{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +27,10 @@ public class Document
     @Column(nullable = false)
     private LocalDateTime uploadDate = LocalDateTime.now();
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private Reminder reminder;
-
 }
