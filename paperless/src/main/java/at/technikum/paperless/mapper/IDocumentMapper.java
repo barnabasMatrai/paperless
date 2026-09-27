@@ -11,6 +11,7 @@ import org.mapstruct.MappingConstants;
 public interface IDocumentMapper {
 
     @Mapping(source = "type", target = "documentType")
+    @Mapping(target = "user", ignore = true)
     Document toEntity(DocumentCreate documentIn);
 
     @Mapping(source = "documentType", target = "type")

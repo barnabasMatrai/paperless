@@ -14,7 +14,7 @@ public interface IReminderService {
 
     Reminder create(Long documentId, Reminder reminder);
 
-    Reminder update(Long documentId, Reminder updatedReminder);
+    Reminder update(Long id, Reminder updatedReminder);
 
     void deleteByDocumentId(Long documentId);
 

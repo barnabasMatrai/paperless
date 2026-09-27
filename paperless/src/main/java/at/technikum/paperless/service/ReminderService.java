@@ -4,23 +4,18 @@ import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.entity.Reminder;
 import at.technikum.paperless.repository.IDocumentRepository;
 import at.technikum.paperless.repository.IReminderRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@AllArgsConstructor
 public class ReminderService implements IReminderService {
 
     private final IReminderRepository reminderRepository;
     private final IDocumentRepository documentRepository;
-
-    public ReminderService(
-            IReminderRepository reminderRepository,
-            IDocumentRepository documentRepository) {
-        this.reminderRepository = reminderRepository;
-        this.documentRepository = documentRepository;
-    }
 
     public List<Reminder> findAll() {
         return reminderRepository.findAll();
@@ -51,8 +46,8 @@ public class ReminderService implements IReminderService {
         return reminderRepository.save(reminder);
     }
 
-    public Reminder update(Long documentId, Reminder updatedReminder) {
-        Reminder existingReminder = findByDocumentId(documentId);
+    public Reminder update(Long id, Reminder updatedReminder) {
+        Reminder existingReminder = findById(id);
 
         existingReminder.setDescription(updatedReminder.getDescription());
         existingReminder.setDueDate(updatedReminder.getDueDate());

@@ -28,27 +28,26 @@ public class ReminderController {
         );
     }
 
-    @PostMapping("/documents/{documentId}/reminders")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReminderPublic create(
-            @PathVariable Long documentId,
             @Valid @RequestBody ReminderCreate reminderIn) {
 
         Reminder saved = reminderService.create(
-                documentId,
+                reminderIn.getDocumentId(),
                 reminderMapper.toEntity(reminderIn)
         );
 
         return reminderMapper.toObject(saved);
     }
 
-    @PutMapping("(/documents/{documentId}/reminders/{id}")
+    @PutMapping("/{id}")
     public ReminderPublic update(
-            @PathVariable Long documentId,
+            @PathVariable Long id,
             @Valid @RequestBody ReminderCreate reminderIn) {
 
         Reminder updated = reminderService.update(
-                documentId,
+                id,
                 reminderMapper.toEntity(reminderIn)
         );
 
@@ -57,7 +56,7 @@ public class ReminderController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long reminderId) {
-        reminderService.deleteById(reminderId);
+    public void delete(@PathVariable Long id) {
+        reminderService.deleteById(id);
     }
 }

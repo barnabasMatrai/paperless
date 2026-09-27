@@ -37,7 +37,8 @@ public class DocumentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DocumentPublic create(@Valid @RequestBody DocumentCreate documentIn) {
-        Document saved = documentService.save(documentMapper.toEntity(documentIn));
+        Document document = documentMapper.toEntity(documentIn);
+        Document saved = documentService.save(documentIn.getUserId(), document);
         return documentMapper.toObject(saved);
     }
 
