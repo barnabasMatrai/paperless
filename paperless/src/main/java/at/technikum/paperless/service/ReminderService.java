@@ -67,7 +67,16 @@ public class ReminderService implements IReminderService {
         reminderRepository.delete(reminder);
     }
 
+    @Override
     public void deleteById(Long id) {
-        reminderRepository.deleteById(id);
+        Reminder reminder = reminderRepository.findById(id)
+                .orElseThrow(() ->
+                        new NoSuchElementException("Reminder not found: " + id));
+
+        Document document = reminder.getDocument();
+
+        document.setReminder(null);
+
+        reminderRepository.delete(reminder);
     }
 }
