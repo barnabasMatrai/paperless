@@ -10,7 +10,7 @@ public interface IDocumentService {
 
     Document findById(Long id);
 
-    Document save(Document document);
+    Document save(Long userId, Document document);
 
     Document update(Long id, Document updatedDocument);
 

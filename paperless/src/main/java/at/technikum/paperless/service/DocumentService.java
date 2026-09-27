@@ -1,20 +1,21 @@
 package at.technikum.paperless.service;
 
 import at.technikum.paperless.entity.Document;
+import at.technikum.paperless.entity.User;
 import at.technikum.paperless.repository.IDocumentRepository;
+import at.technikum.paperless.repository.IUserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@AllArgsConstructor
 public class DocumentService implements IDocumentService {
 
     private final IDocumentRepository documentRepository;
-
-    public DocumentService(IDocumentRepository documentRepository) {
-        this.documentRepository = documentRepository;
-    }
+    private final IUserRepository userRepository;
 
     public List<Document> findAll() {
         return documentRepository.findAll();
@@ -26,7 +27,14 @@ public class DocumentService implements IDocumentService {
                         new NoSuchElementException("Document not found: " + id));
     }
 
-    public Document save(Document document) {
+    public Document save(Long userId, Document document) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "User not found: " + userId));
+
+        document.setUser(user);
+
         return documentRepository.save(document);
     }
 

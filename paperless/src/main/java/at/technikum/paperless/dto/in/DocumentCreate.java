@@ -18,5 +18,6 @@ public class DocumentCreate {
     @NotNull
     private LocalDateTime uploadDate;
 
-    private ReminderCreate reminder;
+    @NotNull
+    private Long userId;
 }

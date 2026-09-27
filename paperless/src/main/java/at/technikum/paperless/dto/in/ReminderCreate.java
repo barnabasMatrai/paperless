@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 @Data
 public class ReminderCreate {
     @NotNull
+    private Long documentId;
+
+    @NotNull
     private LocalDateTime dueDate;
 
     private boolean notified;
