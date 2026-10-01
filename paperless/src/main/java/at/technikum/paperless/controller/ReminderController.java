@@ -9,9 +9,11 @@ import at.technikum.paperless.entity.Reminder;
 import at.technikum.paperless.mapper.IReminderMapper;
 import at.technikum.paperless.service.IReminderService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@PreAuthorize("isAuthenticated()")
 @AllArgsConstructor
 @RequestMapping("/api/reminders")
 @CrossOrigin

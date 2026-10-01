@@ -9,11 +9,13 @@ import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.mapper.IDocumentMapper;
 import at.technikum.paperless.service.IDocumentService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("isAuthenticated()")
 @AllArgsConstructor
 @RequestMapping("/api/documents")
 @SecurityRequirement(name = "bearerAuth")
