@@ -17,7 +17,4 @@ public class DocumentCreate {
 
     @NotNull
     private LocalDateTime uploadDate;
-
-    @NotNull
-    private Long userId;
 }
