@@ -1,20 +1,18 @@
 package at.technikum.paperless.controller;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import at.technikum.paperless.dto.in.DocumentCreate;
 import at.technikum.paperless.dto.out.DocumentPublic;
 import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.mapper.IDocumentMapper;
 import at.technikum.paperless.service.IDocumentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

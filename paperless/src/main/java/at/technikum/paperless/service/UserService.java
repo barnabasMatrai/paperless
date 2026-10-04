@@ -1,15 +1,13 @@
 package at.technikum.paperless.service;
 
+import at.technikum.paperless.dto.in.UserRegisterCreate;
+import at.technikum.paperless.entity.User;
 import at.technikum.paperless.exception.UsernameAlreadyExistsException;
+import at.technikum.paperless.repository.IUserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import at.technikum.paperless.dto.in.UserRegisterCreate;
-import at.technikum.paperless.dto.out.UserPublic;
-import at.technikum.paperless.entity.User;
-import at.technikum.paperless.mapper.IUserMapper;
-import at.technikum.paperless.repository.IUserRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
