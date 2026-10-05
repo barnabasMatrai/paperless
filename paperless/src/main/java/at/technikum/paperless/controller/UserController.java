@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("#id == T(java.lang.Long).valueOf(authentication.name)")
     @SecurityRequirement(name = "bearerAuth")
     public UserPublic update(
             @PathVariable Long id,
@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("#id == T(java.lang.Long).valueOf(authentication.name)")
     @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

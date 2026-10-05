@@ -60,12 +60,14 @@ public class DocumentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@documentSecurity.isOwner(#id, authentication)")
     public DocumentPublic update(@PathVariable Long id, @Valid @RequestBody DocumentCreate documentIn) {
         Document updated = documentService.update(id, documentMapper.toEntity(documentIn));
         return documentMapper.toObject(updated);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@documentSecurity.isOwner(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         documentService.deleteById(id);
