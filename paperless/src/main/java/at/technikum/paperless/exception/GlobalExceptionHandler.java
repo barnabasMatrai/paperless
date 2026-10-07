@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,6 +36,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleUsernameAlreadyExists(
             UsernameAlreadyExistsException exception) {
+
+        return Map.of("error", exception.getMessage());
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNoSuchElement(
+            NoSuchElementException exception) {
 
         return Map.of("error", exception.getMessage());
     }

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class UserPublic {
-    private int id;
+    private long id;
     private String username;
     private List<DocumentCreate> documents;
 }
