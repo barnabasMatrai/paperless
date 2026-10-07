@@ -1,5 +1,6 @@
 package at.technikum.paperless.controller;
 
+import at.technikum.paperless.dto.in.ReminderUpdateCreate;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -9,9 +10,11 @@ import at.technikum.paperless.entity.Reminder;
 import at.technikum.paperless.mapper.IReminderMapper;
 import at.technikum.paperless.service.IReminderService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@PreAuthorize("isAuthenticated()")
 @AllArgsConstructor
 @RequestMapping("/api/reminders")
 @CrossOrigin
@@ -42,9 +45,10 @@ public class ReminderController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@reminderSecurity.isOwner(#id, authentication)")
     public ReminderPublic update(
             @PathVariable Long id,
-            @Valid @RequestBody ReminderCreate reminderIn) {
+            @Valid @RequestBody ReminderUpdateCreate reminderIn) {
 
         Reminder updated = reminderService.update(
                 id,
@@ -55,6 +59,7 @@ public class ReminderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@reminderSecurity.isOwner(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         reminderService.deleteById(id);
