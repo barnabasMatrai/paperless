@@ -39,6 +39,7 @@ public class DocumentController {
         return documentMapper.toObject(documentService.findById(id));
     }
 
+    //Verbesserungsbedürftig / TODO
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public MultipartFile create(
@@ -58,6 +59,7 @@ public class DocumentController {
         Document saved = documentService.save(userId, document);
         return documentMapper.toObject(saved);
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("@documentSecurity.isOwner(#id, authentication)")
