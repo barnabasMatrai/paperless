@@ -17,25 +17,35 @@ export class LoginComponent {
   loading = false;
 
   loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', Validators.required],
     password: ['', Validators.required],
     rememberMe: [false],
   });
 
-  get email() { return this.loginForm.controls.email; }
-  get password() { return this.loginForm.controls.password; }
+  get username() {
+    return this.loginForm.controls.username;
+  }
+
+  get password() {
+    return this.loginForm.controls.password;
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
+
     this.loading = true;
-    const { email, password, rememberMe } = this.loginForm.getRawValue();
+
+    const { username, password, rememberMe } =
+      this.loginForm.getRawValue();
 
     // TODO: AuthService aufrufen, z.B.
-    // this.authService.login(email, password, rememberMe).subscribe({...})
-    console.log('Login:', { email, rememberMe });
+    // this.authService.login(username, password, rememberMe).subscribe({...})
+
+    console.log('Login:', { username, rememberMe });
+
     this.loading = false;
   }
 }

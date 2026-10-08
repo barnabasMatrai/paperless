@@ -1,0 +1,366 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
+
+:host {
+  --navy-900: #172a4d;
+  --navy-800: #1e3560;
+  --blue-600: #1a6ef5;
+  --blue-700: #145bd1;
+  --text-900: #14213d;
+  --text-600: #5b6b82;
+  --text-400: #8a97a8;
+  --border: #d9e0ea;
+  --bg-light: #f5f8fc;
+  --error: #d93838;
+
+  display: block;
+  font-family: 'Nunito Sans', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ================= Right / Form Side ================= */
+
+.form-panel {
+  position: relative;
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 24px;
+
+  background: var(--bg-light);
+  overflow: hidden;
+}
+
+/* Decorative shapes */
+
+.shape {
+  position: absolute;
+  border-radius: 48px;
+  pointer-events: none;
+}
+
+.shape--light-1 {
+  width: 300px;
+  height: 300px;
+
+  top: -40px;
+  right: -60px;
+
+  background: rgba(26, 110, 245, 0.06);
+  transform: rotate(35deg);
+}
+
+.shape--light-2 {
+  width: 340px;
+  height: 340px;
+
+  bottom: -180px;
+  left: 40px;
+
+  background: rgba(26, 110, 245, 0.05);
+  transform: rotate(-30deg);
+}
+
+/* ================= Register Card ================= */
+
+.login-card {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  max-width: 620px;
+
+  padding: 50px 58px 48px;
+
+  background: #fff;
+  border-radius: 14px;
+
+  box-shadow: 0 12px 40px rgba(23, 42, 77, 0.08);
+}
+
+/* ================= Header ================= */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  padding-bottom: 36px;
+
+  border-bottom: 1px solid #e6ebf2;
+}
+
+.logo-icon {
+  width: 62px;
+  flex-shrink: 0;
+}
+
+.logo-icon svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.card-title {
+  margin: 0;
+
+  font-size: 2rem;
+  font-weight: 700;
+
+  color: var(--text-900);
+}
+
+.card-subtitle {
+  margin: 2px 0 0;
+
+  font-size: 1.15rem;
+  color: var(--text-600);
+}
+
+/* ================= Welcome ================= */
+
+.welcome {
+  margin: 30px 0 6px;
+
+  font-size: 2.4rem;
+  font-weight: 800;
+
+  color: var(--text-900);
+}
+
+.welcome-text {
+  margin: 0 0 34px;
+
+  font-size: 1.2rem;
+  color: var(--text-600);
+}
+
+/* ================= Form ================= */
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 1.05rem;
+  font-weight: 600;
+
+  color: var(--text-900);
+}
+
+/* Input */
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+
+  height: 56px;
+  padding: 0 18px;
+
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--blue-600);
+
+  box-shadow:
+    0 0 0 3px rgba(26, 110, 245, 0.15);
+}
+
+.input-wrapper.invalid {
+  border-color: var(--error);
+}
+
+.input-icon,
+.toggle-password svg {
+  width: 24px;
+  height: 24px;
+
+  fill: none;
+  stroke: var(--text-600);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  flex-shrink: 0;
+}
+
+.input-wrapper input {
+  flex: 1;
+  min-width: 0;
+
+  height: 100%;
+  margin-left: 22px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font: inherit;
+  font-size: 1.05rem;
+
+  color: var(--text-900);
+}
+
+.input-wrapper input::placeholder {
+  color: var(--text-400);
+}
+
+/* Password toggle */
+
+.toggle-password {
+  display: grid;
+  place-items: center;
+
+  padding: 4px;
+
+  border: none;
+  background: none;
+
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.toggle-password:focus-visible {
+  outline: 2px solid var(--blue-600);
+}
+
+/* Validation */
+
+.error {
+  display: block;
+
+  margin-top: 6px;
+
+  font-size: 0.9rem;
+  color: var(--error);
+}
+
+/* ================= Register Button ================= */
+
+.btn-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  width: 100%;
+  height: 56px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: var(--blue-600);
+  color: #fff;
+
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: background 0.15s;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: var(--blue-700);
+}
+
+.btn-login:focus-visible {
+  outline: 3px solid rgba(26, 110, 245, 0.4);
+  outline-offset: 2px;
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-login svg {
+  width: 22px;
+  height: 22px;
+
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ================= Footer ================= */
+
+.card-footer {
+  margin-top: 28px;
+  padding-top: 24px;
+
+  border-top: 1px solid #e6ebf2;
+
+  text-align: center;
+
+  font-size: 1.05rem;
+  color: var(--text-900);
+}
+
+.link {
+  color: var(--blue-600);
+
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link--bold {
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* ================= Responsive ================= */
+
+@media (max-width: 560px) {
+  .login-card {
+    padding: 32px 22px;
+  }
+
+  .card-header {
+    gap: 18px;
+    padding-bottom: 24px;
+  }
+
+  .card-title {
+    font-size: 1.6rem;
+  }
+
+  .welcome {
+    font-size: 1.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
