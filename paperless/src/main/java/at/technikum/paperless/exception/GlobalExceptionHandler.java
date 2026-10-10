@@ -5,6 +5,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,22 @@ public class GlobalExceptionHandler {
             UsernameAlreadyExistsException exception) {
 
         return Map.of("error", exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFileException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleInvalidFile(
+            InvalidFileException exception) {
+
+        return Map.of("error", exception.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
+    public Map<String, String> handleMaxUploadSize(
+            MaxUploadSizeExceededException exception) {
+
+        return Map.of("error", "File must not be larger than 20 MB");
     }
 
     @ExceptionHandler(NoSuchElementException.class)
