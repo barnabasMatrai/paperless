@@ -4,14 +4,16 @@ import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
 import { UserLoginPublic } from '../dtos/in/user-login-public';
 import { AuthCreate } from '../dtos/out/auth-create';
 import { UserRegisterCreate } from '../dtos/out/user-register-create';
+import { API_URL } from '../api.config';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8081/api/auth';
-  private readonly usersUrl = 'http://localhost:8081/api/users';
+  private readonly apiUrl = `${API_URL}/auth`;
+  private readonly usersUrl = `${API_URL}/users`;
 
   readonly currentUser = signal<UserLoginPublic | null>(null);
   readonly isAuthenticated = signal(false);
