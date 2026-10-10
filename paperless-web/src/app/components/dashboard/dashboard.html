@@ -15,7 +15,7 @@
               <path d="M4 21a8 8 0 0 1 16 0z" />
             </svg>
           </span>
-          <span class="user-name">Demo User</span>
+          <span class="user-name">{{ currentUser()?.username }}</span>
           <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6" />
           </svg>
@@ -56,7 +56,7 @@
             <input
               type="search"
               name="search"
-              placeholder="Search documents (title, description, category, ...)"
+              placeholder="Search documents (title, category, ...)"
               [(ngModel)]="searchInput"
             />
           </div>
@@ -178,7 +178,6 @@
                       </span>
                       <div class="doc-text">
                         <span class="doc-name">{{ doc.title }}</span>
-                        <span class="doc-desc">{{ doc.description }}</span>
                         @if (doc.reminder; as reminder) {
                           <span
                             class="doc-reminder"
@@ -250,7 +249,9 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="6" class="empty">No documents found.</td>
+                  <td colspan="6" class="empty">
+                    {{ documentsLoading() ? 'Loading documents…' : 'No documents found.' }}
+                  </td>
                 </tr>
               }
             </tbody>

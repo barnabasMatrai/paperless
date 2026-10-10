@@ -180,16 +180,11 @@ export class UploadDocumentComponent implements OnInit {
     this.submitError.set(null);
 
     const { filename, type } = this.uploadForm.getRawValue();
-    const body = {
-      filename: filename.trim(),
-      type: type as DocumentType,
-      uploadDate: existing?.uploadDate ?? toLocalDateTime(new Date()),
-    };
+    const metadata = { filename: filename.trim(), type: type as DocumentType };
 
-    // TODO: Datei selbst hochladen, sobald das Backend sie speichert (siehe DocumentService)
     const request = existing
-      ? this.documentService.update(existing.id, body)
-      : this.documentService.create(body);
+      ? this.documentService.update(existing.id, { ...metadata, uploadDate: existing.uploadDate })
+      : this.documentService.upload(this.file()!, metadata);
 
     request
       .pipe(
@@ -297,7 +292,9 @@ export class UploadDocumentComponent implements OnInit {
       case 403:
         return 'Nicht angemeldet oder keine Berechtigung.';
       case 400:
-        return 'Ungültige Eingaben.';
+        return 'Ungültige Datei oder Eingaben.';
+      case 413:
+        return 'Die Datei darf maximal 20 MB groß sein.';
       case 404:
         return 'Dokument nicht gefunden.';
       default:

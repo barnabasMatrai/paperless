@@ -23,6 +23,12 @@ export interface DocumentCreate {
   uploadDate: string;
 }
 
+/** Metadaten-Part beim Upload; uploadDate setzt das Backend */
+export interface DocumentUpload {
+  filename: string;
+  type: DocumentType;
+}
+
 export interface DocumentPublic {
   id: number;
   filename: string;

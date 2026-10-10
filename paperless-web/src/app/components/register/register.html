@@ -205,6 +205,10 @@
           </small>
         </div>
 
+        <div class="error-message" *ngIf="errorMessage" role="alert">
+          {{ errorMessage }}
+        </div>
+
         <!-- Register -->
         <button
           type="submit"

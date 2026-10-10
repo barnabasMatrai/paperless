@@ -7,7 +7,9 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -18,10 +20,13 @@ import { RouterLink } from '@angular/router';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   showPassword = false;
   showRepeatPassword = false;
   loading = false;
+  errorMessage = '';
 
   registerForm = this.fb.nonNullable.group(
     {
@@ -70,23 +75,37 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
+    if (this.registerForm.invalid || this.loading) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
+    this.errorMessage = '';
 
     const { username, password } = this.registerForm.getRawValue();
 
-    // TODO: AuthService aufrufen, z.B.
-    // this.authService.register(username, password).subscribe({
-    //   next: () => { ... },
-    //   error: () => { this.loading = false; }
-    // });
+    this.authService
+      .register({ username, password })
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(['/login'], {
+            state: { registeredUsername: username },
+          });
+        },
+        error: (error) => {
+          this.loading = false;
 
-    console.log('Register:', { username, password });
-
-    this.loading = false;
+          if (error.status === 409) {
+            this.errorMessage = 'This username is already taken.';
+          } else if (error.status === 400) {
+            this.errorMessage = 'Please check your input.';
+          } else {
+            this.errorMessage =
+              'Registration failed. Please try again later.';
+          }
+        },
+      });
   }
 }

@@ -18,12 +18,19 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  // Wird von der Register-Seite über den Router-State mitgegeben
+  private readonly registeredUsername: string =
+    this.router.currentNavigation()?.extras.state?.['registeredUsername'] ?? '';
+
   showPassword = false;
   loading = false;
   errorMessage = '';
+  successMessage = this.registeredUsername
+    ? 'Account created. Please log in.'
+    : '';
 
   loginForm = this.fb.nonNullable.group({
-    username: ['', Validators.required],
+    username: [this.registeredUsername, Validators.required],
     password: ['', Validators.required],
     rememberMe: [false],
   });
@@ -44,6 +51,7 @@ export class LoginComponent {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     const { username, password } = this.loginForm.getRawValue();
 

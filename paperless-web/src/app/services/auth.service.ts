@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
 import { UserLoginPublic } from '../dtos/in/user-login-public';
 import { AuthCreate } from '../dtos/out/auth-create';
+import { UserRegisterCreate } from '../dtos/out/user-register-create';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,7 @@ import { AuthCreate } from '../dtos/out/auth-create';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8081/api/auth';
+  private readonly usersUrl = 'http://localhost:8081/api/users';
 
   readonly currentUser = signal<UserLoginPublic | null>(null);
   readonly isAuthenticated = signal(false);
@@ -31,6 +33,12 @@ export class AuthService {
         }),
         finalize(() => this.isLoading.set(false)),
       );
+  }
+
+  register(user: UserRegisterCreate): Observable<void> {
+    return this.http
+      .post<unknown>(this.usersUrl, user)
+      .pipe(map(() => undefined));
   }
 
   logout(): Observable<void> {

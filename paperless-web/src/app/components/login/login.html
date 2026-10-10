@@ -95,6 +95,10 @@
         </div>
 
         
+        <div class="success-message" *ngIf="successMessage" role="status">
+          {{ successMessage }}
+        </div>
+
         <div class="error-message" *ngIf="errorMessage" role="alert">
           {{ errorMessage }}
         </div>

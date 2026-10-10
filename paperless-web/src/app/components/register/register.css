@@ -358,6 +358,16 @@
   }
 }
 
+.error-message {
+  margin-bottom: 16px;
+  padding: 12px;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

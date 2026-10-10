@@ -10,6 +10,7 @@ import {
   DocumentType,
 } from '../../models/document';
 import { ReminderPublic } from '../../models/reminder';
+import { DocumentService } from '../../services/document.service';
 import { ReminderService } from '../../services/reminder.service';
 import { ToastService } from '../../services/toast.service';
 import { toLocalDateTime } from '../../utils/date';
@@ -20,7 +21,6 @@ export type FileType = 'PDF' | 'DOCX' | 'JPG' | 'PNG';
 export interface PaperlessDocument {
   id: number;
   title: string;
-  description: string;
   type: FileType;
   /** Dokumenttyp aus dem Backend (CONTRACT, INVOICE, ...) */
   category: DocumentType;
@@ -40,10 +40,13 @@ const REMINDER_CHECK_INTERVAL = 15_000;
   styleUrls: ['./dashboard.css'],
 })
 export class DashboardComponent {
+  private documentService = inject(DocumentService);
   private reminderService = inject(ReminderService);
   private toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  readonly currentUser = this.authService.currentUser;
 
   readonly pageSize = 10;
 
@@ -54,65 +57,8 @@ export class DashboardComponent {
     { label: 'Settings', icon: 'settings', active: false },
   ];
 
-  // TODO: durch DocumentService ersetzen, sobald REST-Endpunkt verfügbar ist
-  readonly documents = signal<PaperlessDocument[]>([
-    {
-      id: 1,
-      title: 'Rechnung_2024_0123.pdf',
-      description: 'Lieferant Muster GmbH – Rechnung für Büromaterial',
-      type: 'PDF',
-      category: 'INVOICE',
-      uploadedAt: new Date(2025, 1, 10, 14, 23),
-      // Demo: wird ein paar Sekunden nach dem Laden fällig und als Toast angezeigt
-      reminder: {
-        id: 1,
-        dueDate: toLocalDateTime(new Date(Date.now() + 10_000)),
-        description: 'Rechnung bezahlen',
-        notified: false,
-      },
-    },
-    {
-      id: 2,
-      title: 'Projektplanung.docx',
-      description: 'Plan für das Semesterprojekt inkl. Meilensteine',
-      type: 'DOCX',
-      category: 'REPORT',
-      uploadedAt: new Date(2025, 1, 3, 9, 16),
-      reminder: null,
-    },
-    {
-      id: 3,
-      title: 'Vertrag.pdf',
-      description: 'Dienstleistungsvertrag mit Laufzeit 12 Monate',
-      type: 'PDF',
-      category: 'CONTRACT',
-      uploadedAt: new Date(2025, 0, 28, 11, 2),
-      reminder: {
-        id: 2,
-        dueDate: toLocalDateTime(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
-        description: 'Kündigungsfrist prüfen',
-        notified: false,
-      },
-    },
-    {
-      id: 4,
-      title: 'Notizem.jpg',
-      description: 'Handschriftliche Notizen aus dem Meeting',
-      type: 'JPG',
-      category: 'REPORT',
-      uploadedAt: new Date(2025, 0, 20, 16, 45),
-      reminder: null,
-    },
-    {
-      id: 5,
-      title: 'Technische_Dokumentation.pdf',
-      description: 'Systemarchitektur und Komponentenübersicht',
-      type: 'PDF',
-      category: 'REPORT',
-      uploadedAt: new Date(2025, 0, 15, 10, 37),
-      reminder: null,
-    },
-  ]);
+  readonly documents = signal<PaperlessDocument[]>([]);
+  readonly documentsLoading = signal(true);
 
   readonly searchInput = signal('');
   readonly searchTerm = signal('');
@@ -146,7 +92,6 @@ export class DashboardComponent {
       (doc) =>
         (!term ||
           doc.title.toLowerCase().includes(term) ||
-          doc.description.toLowerCase().includes(term) ||
           this.categoryLabels[doc.category].toLowerCase().includes(term)) &&
         (type === 'all' || doc.type === type) &&
         (category === 'all' || doc.category === category) &&
@@ -183,9 +128,29 @@ export class DashboardComponent {
   );
 
   constructor() {
-    this.checkReminders();
+    this.loadDocuments();
     const interval = setInterval(() => this.checkReminders(), REMINDER_CHECK_INTERVAL);
     inject(DestroyRef).onDestroy(() => clearInterval(interval));
+  }
+
+  private loadDocuments(): void {
+    this.documentsLoading.set(true);
+
+    this.documentService.getAll().subscribe({
+      next: (docs) => {
+        this.documents.set(docs.map((doc) => this.toTableDocument(doc)));
+        this.documentsLoading.set(false);
+        this.checkReminders();
+      },
+      error: () => {
+        this.documentsLoading.set(false);
+        this.toastService.show({
+          type: 'error',
+          title: 'Dokumente nicht geladen',
+          message: 'Die Dokumente konnten nicht vom Server geladen werden.',
+        });
+      },
+    });
   }
 
   isOverdue(reminder: ReminderPublic): boolean {
@@ -273,14 +238,23 @@ export class DashboardComponent {
   }
 
   deleteDocument(doc: PaperlessDocument): void {
-    // TODO: DocumentService.delete aufrufen
-    this.documents.update((docs) => docs.filter((d) => d.id !== doc.id));
-    this.selectedIds.update((ids) => {
-      const next = new Set(ids);
-      next.delete(doc.id);
-      return next;
+    this.documentService.delete(doc.id).subscribe({
+      next: () => {
+        this.documents.update((docs) => docs.filter((d) => d.id !== doc.id));
+        this.selectedIds.update((ids) => {
+          const next = new Set(ids);
+          next.delete(doc.id);
+          return next;
+        });
+        this.goToPage(this.page());
+      },
+      error: () =>
+        this.toastService.show({
+          type: 'error',
+          title: 'Löschen fehlgeschlagen',
+          message: doc.title,
+        }),
     });
-    this.goToPage(this.page());
   }
 
   uploadDocument(): void {
@@ -333,12 +307,10 @@ export class DashboardComponent {
     return formatDate(dueDate, 'dd.MM.yyyy, HH:mm', 'en-US');
   }
 
-  // TODO: entfällt, sobald die Tabelle direkt mit DocumentPublic aus dem Backend arbeitet
   private toTableDocument(doc: DocumentPublic): PaperlessDocument {
     return {
       id: doc.id,
       title: doc.filename,
-      description: '',
       type: this.fileType(doc.filename),
       category: doc.type,
       uploadedAt: new Date(doc.uploadDate),
