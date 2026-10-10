@@ -1,7 +1,10 @@
+
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,10 +14,13 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   showPassword = false;
   loading = false;
+  errorMessage = '';
 
   loginForm = this.fb.nonNullable.group({
     username: ['', Validators.required],
@@ -31,21 +37,31 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.invalid) {
+    if (this.loginForm.invalid || this.loading) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
+    this.errorMessage = '';
 
-    const { username, password, rememberMe } =
-      this.loginForm.getRawValue();
+    const { username, password } = this.loginForm.getRawValue();
 
-    // TODO: AuthService aufrufen, z.B.
-    // this.authService.login(username, password, rememberMe).subscribe({...})
+    this.authService.login({ username, password }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/']);
+      },
+      error: (error) => {
+        this.loading = false;
 
-    console.log('Login:', { username, rememberMe });
-
-    this.loading = false;
+        if (error.status === 401 || error.status === 400) {
+          this.errorMessage = 'Invalid username or password.';
+        } else {
+          this.errorMessage =
+            'Login failed. Please try again later.';
+        }
+      },
+    });
   }
 }

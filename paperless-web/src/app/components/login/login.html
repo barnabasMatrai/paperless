@@ -94,6 +94,12 @@
           </a>
         </div>
 
+        
+        <div class="error-message" *ngIf="errorMessage" role="alert">
+          {{ errorMessage }}
+        </div>
+
+
         <button type="submit" class="btn-login" [disabled]="loading">
           {{ loading ? 'Signing in…' : 'Login' }}
 
