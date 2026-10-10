@@ -652,6 +652,21 @@ svg {
   cursor: default;
 }
 
+.user-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .user-dropdown button:hover {
+    background: #f3f4f6;
+  }
+
 /* ================= Responsive ================= */
 
 @media (max-width: 900px) {

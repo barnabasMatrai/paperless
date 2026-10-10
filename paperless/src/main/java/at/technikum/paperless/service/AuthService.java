@@ -9,6 +9,7 @@ import at.technikum.paperless.mapper.IUserMapper;
 import at.technikum.paperless.repository.IUserRepository;
 import at.technikum.paperless.security.JwtIssuer;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +39,14 @@ public class AuthService implements IAuthService {
         AuthPublic auth = new AuthPublic(token, userLogin);
 
         return auth;
+    }
+
+    @Override
+    public UserLoginPublic getCurrentUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
+
+        return userMapper.toLoginObject(user);
     }
 }

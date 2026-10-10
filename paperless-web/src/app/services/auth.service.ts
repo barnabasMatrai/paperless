@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of, finalize } from 'rxjs';
+import { Observable, tap, catchError, of, finalize, map } from 'rxjs';
 import { UserLoginPublic } from '../dtos/in/user-login-public';
 import { AuthCreate } from '../dtos/out/auth-create';
 
@@ -52,5 +52,25 @@ export class AuthService {
   private clearAuth(): void {
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
+  }
+
+  checkAuth(): Observable<boolean> {
+    return this.http
+      .get<UserLoginPublic>(
+        `${this.apiUrl}/me`,
+        { withCredentials: true },
+      )
+      .pipe(
+        tap((user) => {
+          this.currentUser.set(user);
+          this.isAuthenticated.set(true);
+        }),
+        map(() => true),
+        catchError(() => {
+          this.currentUser.set(null);
+          this.isAuthenticated.set(false);
+          return of(false);
+        }),
+      );
   }
 }

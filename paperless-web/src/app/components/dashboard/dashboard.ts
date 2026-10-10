@@ -1,7 +1,7 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { DatePipe, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { UploadDocumentComponent } from '../upload-document/upload-document';
 import {
   DOCUMENT_TYPES,
@@ -13,6 +13,7 @@ import { ReminderPublic } from '../../models/reminder';
 import { ReminderService } from '../../services/reminder.service';
 import { ToastService } from '../../services/toast.service';
 import { toLocalDateTime } from '../../utils/date';
+import { AuthService } from '../../services/auth.service';
 
 export type FileType = 'PDF' | 'DOCX' | 'JPG' | 'PNG';
 
@@ -41,6 +42,8 @@ const REMINDER_CHECK_INTERVAL = 15_000;
 export class DashboardComponent {
   private reminderService = inject(ReminderService);
   private toastService = inject(ToastService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly pageSize = 10;
 
@@ -366,5 +369,18 @@ export class DashboardComponent {
   private minDate(filter: DateFilter): Date | null {
     const days = { all: 0, '7d': 7, '30d': 30, '365d': 365 }[filter];
     return days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null;
+  }
+
+  logout(): void {
+    this.userMenuOpen.set(false);
+
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.router.navigate(['/login']);
+      },
+    });
   }
 }

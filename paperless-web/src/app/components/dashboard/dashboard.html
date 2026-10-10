@@ -24,7 +24,7 @@
         @if (userMenuOpen()) {
           <div class="user-dropdown">
             <a href="#" (click)="$event.preventDefault()">Profile</a>
-            <a routerLink="/login">Logout</a>
+            <button type="button" (click)="logout()">Logout</button>
           </div>
         }
       </div>
