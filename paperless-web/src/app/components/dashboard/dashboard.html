@@ -1,1 +1,309 @@
-<p>dashboard works!</p>
+<div class="layout">
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="user-menu">
+        <button
+          type="button"
+          class="user-button"
+          [attr.aria-expanded]="userMenuOpen()"
+          (click)="userMenuOpen.set(!userMenuOpen())"
+        >
+          <span class="avatar">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0z" />
+            </svg>
+          </span>
+          <span class="user-name">Demo User</span>
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+
+        @if (userMenuOpen()) {
+          <div class="user-dropdown">
+            <a href="#" (click)="$event.preventDefault()">Profile</a>
+            <a routerLink="/login">Logout</a>
+          </div>
+        }
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Documents</h2>
+          <p class="page-subtitle">Manage, search and archive your documents.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-upload" (click)="uploadDocument()">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
+          </svg>
+          Upload Document
+        </button>
+      </div>
+
+      <!-- Search & filters -->
+      <section class="card filters">
+        <form class="search-row" (ngSubmit)="onSearch()">
+          <div class="search-input">
+            <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            <input
+              type="search"
+              name="search"
+              placeholder="Search documents (title, description, category, ...)"
+              [(ngModel)]="searchInput"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-search">Search</button>
+        </form>
+
+        <div class="filter-row">
+          <select
+            class="select"
+            name="type"
+            [(ngModel)]="typeFilter"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="all">All types</option>
+            @for (type of types(); track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+
+          <select
+            class="select"
+            name="category"
+            [(ngModel)]="categoryFilter"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="all">All categories</option>
+            @for (category of categories; track category) {
+              <option [value]="category">{{ categoryLabels[category] }}</option>
+            }
+          </select>
+
+          <select
+            class="select"
+            name="date"
+            [(ngModel)]="dateFilter"
+            (ngModelChange)="onFilterChange()"
+          >
+            <option value="all">All dates</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="365d">Last year</option>
+          </select>
+
+          <button type="button" class="btn btn-secondary btn-clear" (click)="clearFilters()">
+            Clear filters
+          </button>
+        </div>
+      </section>
+
+      <!-- Documents table -->
+      <section class="card table-card">
+        <div class="table-scroll">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th class="col-check">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all documents"
+                    [checked]="allSelected()"
+                    [indeterminate]="someSelected()"
+                    (change)="toggleAll()"
+                  />
+                </th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Upload Date</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (doc of pagedDocuments(); track doc.id) {
+                <tr [class.selected]="selectedIds().has(doc.id)">
+                  <td class="col-check">
+                    <input
+                      type="checkbox"
+                      [attr.aria-label]="'Select ' + doc.title"
+                      [checked]="selectedIds().has(doc.id)"
+                      (change)="toggleSelection(doc.id)"
+                    />
+                  </td>
+                  <td>
+                    <div class="doc-title">
+                      <span class="file-icon" [class]="'file-icon file-' + doc.type.toLowerCase()">
+                        @switch (doc.type === 'PNG' ? 'JPG' : doc.type) {
+                          @case ('JPG') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <rect x="2" y="2" width="20" height="20" rx="3" class="file-bg" />
+                              <circle cx="8.5" cy="8.5" r="2" fill="#fff" />
+                              <path d="m4 18 5-6 3 4 3-3 5 5z" fill="#fff" />
+                            </svg>
+                          }
+                          @case ('DOCX') {
+                            <svg viewBox="0 0 24 30" aria-hidden="true">
+                              <path
+                                d="M3 0h13l8 8v19a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3z"
+                                class="file-bg"
+                              />
+                              <path d="M16 0l8 8h-6a2 2 0 0 1-2-2V0z" fill="rgba(255,255,255,.5)" />
+                              <rect x="5" y="14" width="14" height="2" rx="1" fill="#fff" />
+                              <rect x="5" y="18" width="14" height="2" rx="1" fill="#fff" />
+                              <rect x="5" y="22" width="14" height="2" rx="1" fill="#fff" />
+                            </svg>
+                          }
+                          @default {
+                            <svg viewBox="0 0 24 30" aria-hidden="true">
+                              <path
+                                d="M3 0h13l8 8v19a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3z"
+                                class="file-bg"
+                              />
+                              <path d="M16 0l8 8h-6a2 2 0 0 1-2-2V0z" fill="rgba(255,255,255,.5)" />
+                              <text x="12" y="22" text-anchor="middle" class="file-label">
+                                {{ doc.type }}
+                              </text>
+                            </svg>
+                          }
+                        }
+                      </span>
+                      <div class="doc-text">
+                        <span class="doc-name">{{ doc.title }}</span>
+                        <span class="doc-desc">{{ doc.description }}</span>
+                        @if (doc.reminder; as reminder) {
+                          <span
+                            class="doc-reminder"
+                            [class.overdue]="isOverdue(reminder)"
+                            [title]="reminder.description"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"
+                              />
+                            </svg>
+                            {{ reminder.description }} ·
+                            {{ reminder.dueDate | date: 'dd.MM.yyyy, HH:mm' }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="doc-type">{{ doc.type }}</td>
+                  <td>
+                    <span [class]="'category category-' + doc.category.toLowerCase()">
+                      {{ categoryLabels[doc.category] }}
+                    </span>
+                  </td>
+                  <td class="doc-date">
+                    <span>{{ doc.uploadedAt | date: 'MMM d, y' }}</span>
+                    <span>{{ doc.uploadedAt | date: 'HH:mm' }}</span>
+                  </td>
+                  <td class="col-actions">
+                    <div class="actions">
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        title="View"
+                        aria-label="View"
+                        (click)="viewDocument(doc)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        title="Edit"
+                        aria-label="Edit"
+                        (click)="editDocument(doc)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn icon-btn-danger"
+                        title="Delete"
+                        aria-label="Delete"
+                        (click)="deleteDocument(doc)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty">No documents found.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="table-footer">
+          <span class="range">
+            Showing {{ rangeStart() }} – {{ rangeEnd() }} of {{ filteredDocuments().length }}
+            documents
+          </span>
+
+          <nav class="pagination" aria-label="Pagination">
+            <button
+              type="button"
+              class="page-btn"
+              aria-label="Previous page"
+              [disabled]="page() === 1"
+              (click)="goToPage(page() - 1)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+            </button>
+            @for (p of pages(); track p) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.active]="p === page()"
+                [attr.aria-current]="p === page() ? 'page' : null"
+                (click)="goToPage(p)"
+              >
+                {{ p }}
+              </button>
+            }
+            <button
+              type="button"
+              class="page-btn"
+              aria-label="Next page"
+              [disabled]="page() === totalPages()"
+              (click)="goToPage(page() + 1)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
+          </nav>
+        </footer>
+      </section>
+    </main>
+  </div>
+</div>
+
+@if (uploadOpen()) {
+  <app-upload-document (closed)="uploadOpen.set(false)" (saved)="onUploaded($event)" />
+}
+
+@if (editingDocument(); as doc) {
+  <app-upload-document [document]="doc" (closed)="editing.set(null)" (saved)="onEdited($event)" />
+}
