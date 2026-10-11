@@ -59,19 +59,19 @@
             </svg>
 
             <input id="password"
-                   [type]="showPassword ? 'text' : 'password'"
+                   [type]="showPassword() ? 'text' : 'password'"
                    formControlName="password"
                    placeholder="Enter your password"
                    autocomplete="current-password" />
 
             <button type="button"
                     class="toggle-password"
-                    (click)="showPassword = !showPassword"
-                    [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+                    (click)="showPassword.set(!showPassword())"
+                    [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
                 <circle cx="12" cy="12" r="3"/>
-                <path *ngIf="showPassword" d="m3 3 18 18"/>
+                <path *ngIf="showPassword()" d="m3 3 18 18"/>
               </svg>
             </button>
           </div>
@@ -95,19 +95,19 @@
         </div>
 
         
-        <div class="success-message" *ngIf="successMessage" role="status">
-          {{ successMessage }}
+        <div class="success-message" *ngIf="successMessage()" role="status">
+          {{ successMessage() }}
         </div>
 
-        <div class="error-message" *ngIf="errorMessage" role="alert">
-          {{ errorMessage }}
+        <div class="error-message" *ngIf="errorMessage()" role="alert">
+          {{ errorMessage() }}
         </div>
 
 
-        <button type="submit" class="btn-login" [disabled]="loading">
-          {{ loading ? 'Signing in…' : 'Login' }}
+        <button type="submit" class="btn-login" [disabled]="loading()">
+          {{ loading() ? 'Signing in…' : 'Login' }}
 
-          <svg *ngIf="!loading" viewBox="0 0 24 24" aria-hidden="true">
+          <svg *ngIf="!loading()" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6"/>
           </svg>
         </button>

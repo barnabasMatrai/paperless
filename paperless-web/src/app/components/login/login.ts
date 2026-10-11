@@ -1,5 +1,5 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -22,12 +22,12 @@ export class LoginComponent {
   private readonly registeredUsername: string =
     this.router.currentNavigation()?.extras.state?.['registeredUsername'] ?? '';
 
-  showPassword = false;
-  loading = false;
-  errorMessage = '';
-  successMessage = this.registeredUsername
+  showPassword = signal(false);
+  loading = signal(false);
+  errorMessage = signal('');
+  successMessage = signal(this.registeredUsername
     ? 'Account created. Please log in.'
-    : '';
+    : '');
 
   loginForm = this.fb.nonNullable.group({
     username: [this.registeredUsername, Validators.required],
@@ -44,30 +44,29 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.invalid || this.loading) {
+    if (this.loginForm.invalid || this.loading()) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     const { username, password } = this.loginForm.getRawValue();
 
     this.authService.login({ username, password }).subscribe({
       next: () => {
-        this.loading = false;
+        this.loading.set(false);
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        this.loading = false;
+        this.loading.set(false);
 
         if (error.status === 401 || error.status === 400) {
-          this.errorMessage = 'Invalid username or password.';
+          this.errorMessage.set('Invalid username or password.');
         } else {
-          this.errorMessage =
-            'Login failed. Please try again later.';
+          this.errorMessage.set('Login failed. Please try again later.');
         }
       },
     });
