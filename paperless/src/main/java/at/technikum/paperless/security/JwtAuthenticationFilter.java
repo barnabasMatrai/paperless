@@ -27,14 +27,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain chain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String token = getTokenFromCookie(request);
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (token == null) {
+            String header = request.getHeader("Authorization");
+
+            if (header != null && header.startsWith("Bearer ")) {
+                token = header.substring(7);
+            }
+        }
+
+        if (token == null || token.isBlank()) {
             chain.doFilter(request, response);
             return;
         }
-
-        String token = header.substring(7);
 
         try {
             var jwt = jwtIssuer.verify(token);
@@ -47,13 +53,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            chain.doFilter(request, response);
-
         } catch (JwtException e) {
-            response.sendError(
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    "Invalid or expired token"
-            );
+            SecurityContextHolder.clearContext();
         }
+
+        chain.doFilter(request, response);
+    }
+
+    private String getTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if ("accessToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
     }
 }

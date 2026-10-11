@@ -35,5 +35,16 @@ services:
     ports:
       - "8081:8081"
 
+  web:
+    build:
+      context: ../paperless-web
+      dockerfile: Dockerfile
+    container_name: paperless-web
+    restart: unless-stopped
+    depends_on:
+      - rest
+    ports:
+      - "80:80"
+
 volumes:
   paperless-db-data:

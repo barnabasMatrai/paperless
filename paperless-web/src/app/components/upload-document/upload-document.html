@@ -1,0 +1,176 @@
+<div class="backdrop" (click)="close()"></div>
+
+<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="upload-title">
+  <header class="dialog-header">
+    <div>
+      @if (isEdit()) {
+        <h2 id="upload-title" class="dialog-title">Dokument bearbeiten</h2>
+        <p class="dialog-subtitle">Ändere Dateiname, Dokumenttyp oder Erinnerung.</p>
+      } @else {
+        <h2 id="upload-title" class="dialog-title">Upload Document</h2>
+        <p class="dialog-subtitle">Lade ein neues Dokument in dein Archiv hoch.</p>
+      }
+    </div>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Schließen"
+      [disabled]="loading()"
+      (click)="close()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+    </button>
+  </header>
+
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" novalidate>
+    <!-- File -->
+    @if (document(); as existing) {
+      <div class="file-preview">
+        <span class="file-badge">{{ fileExtension(existing.filename) }}</span>
+        <div class="file-info">
+          <span class="file-name">{{ existing.filename }}</span>
+          <span class="file-size"
+            >Hochgeladen am {{ existing.uploadDate | date: 'dd.MM.yyyy' }}</span
+          >
+        </div>
+      </div>
+    } @else if (file(); as selected) {
+      <div class="file-preview">
+        <span class="file-badge">{{ selected.name.split('.').pop()?.toUpperCase() }}</span>
+        <div class="file-info">
+          <span class="file-name">{{ selected.name }}</span>
+          <span class="file-size">{{ formatSize(selected.size) }}</span>
+        </div>
+        <button
+          type="button"
+          class="remove-btn"
+          aria-label="Datei entfernen"
+          [disabled]="loading()"
+          (click)="removeFile()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+      </div>
+    } @else {
+      <label
+        class="dropzone"
+        [class.drag-over]="dragOver()"
+        [class.invalid]="fileError()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="dragOver.set(false)"
+        (drop)="onDrop($event)"
+      >
+        <svg class="dropzone-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
+        </svg>
+        <span class="dropzone-text">
+          Datei hierher ziehen oder <span class="link">durchsuchen</span>
+        </span>
+        <span class="dropzone-hint">PDF, DOCX, JPG oder PNG · max. 20 MB</span>
+        <input type="file" class="file-input" [accept]="accept" (change)="onFileInput($event)" />
+      </label>
+    }
+
+    @if (fileError()) {
+      <p class="error">{{ fileError() }}</p>
+    }
+
+    <!-- Filename -->
+    <div class="form-group">
+      <label for="filename">Dateiname</label>
+      <input
+        id="filename"
+        type="text"
+        formControlName="filename"
+        placeholder="z. B. Rechnung_2025_001.pdf"
+        [class.invalid]="filename.invalid && filename.touched"
+      />
+      @if (filename.invalid && filename.touched) {
+        <p class="error">Bitte einen Dateinamen angeben.</p>
+      }
+    </div>
+
+    <!-- Type -->
+    <div class="form-group">
+      <label for="type">Dokumenttyp</label>
+      <select id="type" formControlName="type" [class.invalid]="type.invalid && type.touched">
+        <option value="" disabled>Typ auswählen</option>
+        @for (t of types; track t) {
+          <option [value]="t">{{ typeLabels[t] }}</option>
+        }
+      </select>
+      @if (type.invalid && type.touched) {
+        <p class="error">Bitte einen Dokumenttyp auswählen.</p>
+      }
+    </div>
+
+    <!-- Reminder -->
+    <div class="reminder" [class.open]="reminderEnabled.value">
+      <label class="switch-row">
+        <span class="switch-label">
+          <svg class="bell" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" />
+          </svg>
+          <span>
+            <span class="switch-title">Erinnerung setzen</span>
+            <span class="switch-hint">z. B. Frist für Zahlung oder Vertragskündigung</span>
+          </span>
+        </span>
+        <input type="checkbox" class="switch" formControlName="reminderEnabled" />
+      </label>
+
+      @if (reminderEnabled.value) {
+        <div class="reminder-fields">
+          <div class="form-group">
+            <label for="reminderDueDate">Fällig am</label>
+            <input
+              id="reminderDueDate"
+              type="datetime-local"
+              formControlName="reminderDueDate"
+              [min]="minDueDate"
+              [class.invalid]="reminderDueDate.invalid && reminderDueDate.touched"
+            />
+            @if (reminderDueDate.touched && reminderDueDate.hasError('required')) {
+              <p class="error">Bitte ein Datum auswählen.</p>
+            } @else if (reminderDueDate.touched && reminderDueDate.hasError('pastDate')) {
+              <p class="error">Das Datum muss in der Zukunft liegen.</p>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="reminderDescription">Beschreibung</label>
+            <input
+              id="reminderDescription"
+              type="text"
+              formControlName="reminderDescription"
+              placeholder="z. B. Rechnung bezahlen"
+              maxlength="255"
+              [class.invalid]="reminderDescription.invalid && reminderDescription.touched"
+            />
+            @if (reminderDescription.invalid && reminderDescription.touched) {
+              <p class="error">Bitte eine Beschreibung angeben.</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (submitError()) {
+      <div class="alert">{{ submitError() }}</div>
+    }
+
+    <footer class="dialog-footer">
+      <button type="button" class="btn btn-secondary" [disabled]="loading()" (click)="close()">
+        Abbrechen
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spinner" aria-hidden="true"></span>
+          {{ isEdit() ? 'Wird gespeichert…' : 'Wird hochgeladen…' }}
+        } @else {
+          {{ isEdit() ? 'Speichern' : 'Hochladen' }}
+        }
+      </button>
+    </footer>
+  </form>
+</div>

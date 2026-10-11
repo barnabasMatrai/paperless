@@ -9,6 +9,7 @@ import at.technikum.paperless.dto.in.UserRegisterCreate;
 import at.technikum.paperless.dto.out.UserPublic;
 import at.technikum.paperless.service.IUserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
     public UserPublic read(@PathVariable int id) {
         User user = userService.get(id);
@@ -36,6 +38,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearerAuth")
     public List<UserPublic> readAll() {
         List<User> users = userService.getAll();
@@ -45,6 +48,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("#id == T(java.lang.Long).valueOf(authentication.name)")
     @SecurityRequirement(name = "bearerAuth")
     public UserPublic update(
             @PathVariable Long id,
@@ -56,6 +60,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("#id == T(java.lang.Long).valueOf(authentication.name)")
     @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
