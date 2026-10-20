@@ -3,6 +3,7 @@ package at.technikum.paperless.service;
 import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.entity.User;
 import at.technikum.paperless.exception.InvalidFileException;
+import at.technikum.paperless.messaging.OcrMessagePublisher;
 import at.technikum.paperless.repository.IDocumentRepository;
 import at.technikum.paperless.repository.IUserRepository;
 import at.technikum.paperless.storage.IFileStorageService;
@@ -24,6 +25,7 @@ public class DocumentService implements IDocumentService {
     private final IDocumentRepository documentRepository;
     private final IUserRepository userRepository;
     private final IFileStorageService fileStorageService;
+    private final OcrMessagePublisher ocrMessagePublisher;
 
     public List<Document> findAll() {
         return documentRepository.findAll();
@@ -52,7 +54,11 @@ public class DocumentService implements IDocumentService {
 
         document.setUser(user);
 
-        return documentRepository.save(document);
+        Document savedDocument = documentRepository.save(document);
+
+        ocrMessagePublisher.sendDocumentForOcr(savedDocument.getId());
+
+        return savedDocument;
     }
 
     public Document update(Long id, Document updatedDocument) {
