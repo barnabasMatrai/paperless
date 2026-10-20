@@ -28,16 +28,31 @@ export class RegisterComponent {
   loading = false;
   errorMessage = '';
 
+  
   registerForm = this.fb.nonNullable.group(
     {
-      username: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      repeatPassword: ['', Validators.required],
+      username: ['', [Validators.required, this.noWhitespace]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          this.noWhitespace,
+        ],
+      ],
+      repeatPassword: [
+        '',
+        [
+          Validators.required,
+          this.noWhitespace,
+        ],
+      ],
     },
     {
       validators: this.passwordMatchValidator,
     }
   );
+
 
   get username() {
     return this.registerForm.controls.username;
@@ -57,6 +72,18 @@ export class RegisterComponent {
       this.repeatPassword.touched &&
       this.registerForm.hasError('passwordMismatch')
     );
+  }
+
+  private noWhitespace(
+    control: AbstractControl
+  ): ValidationErrors | null {
+    const value = control.value as string;
+
+    if (/\s/.test(value)) {
+      return { whitespace: true };
+    }
+
+    return null;
   }
 
   private passwordMatchValidator(

@@ -71,8 +71,15 @@
             class="error"
             *ngIf="username.invalid && username.touched"
           >
-            Enter a username.
+            <ng-container *ngIf="username.errors?.['required']">
+              Enter a username.
+            </ng-container>
+
+            <ng-container *ngIf="username.errors?.['whitespace']">
+              Username cannot contain whitespace.
+            </ng-container>
           </small>
+
         </div>
 
         <!-- Password -->
@@ -133,6 +140,11 @@
             <ng-container *ngIf="password.errors?.['minlength']">
               Password must be at least 6 characters.
             </ng-container>
+            
+            <ng-container *ngIf="password.errors?.['whitespace']">
+              Password cannot contain whitespace.
+            </ng-container>
+
           </small>
         </div>
 

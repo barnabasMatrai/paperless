@@ -44,19 +44,13 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.http
-      .post<void>(
-        `${this.apiUrl}/logout`,
-        {},
-        { withCredentials: true },
-      )
-      .pipe(
-        tap(() => this.clearAuth()),
-        catchError((error) => {
-          this.clearAuth();
-          throw error;
-        }),
-      );
+    this.clearAuth();
+
+    return this.http.post<void>(
+      `${this.apiUrl}/logout`,
+      {},
+      { withCredentials: true },
+    );
   }
 
   private clearAuth(): void {
