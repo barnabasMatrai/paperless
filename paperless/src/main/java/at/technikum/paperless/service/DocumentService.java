@@ -10,6 +10,7 @@ import at.technikum.paperless.storage.IFileStorageService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -61,6 +62,7 @@ public class DocumentService implements IDocumentService {
                 });
     }
 
+    @Transactional
     public Document upload(Long userId, Document document, MultipartFile file) {
         log.info("Starting document upload for user with ID {}", userId);
 

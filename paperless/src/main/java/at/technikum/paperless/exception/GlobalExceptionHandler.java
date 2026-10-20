@@ -1,5 +1,6 @@
 package at.technikum.paperless.exception;
 
+import org.springframework.amqp.AmqpException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -63,5 +64,13 @@ public class GlobalExceptionHandler {
             NoSuchElementException exception) {
 
         return Map.of("error", exception.getMessage());
+    }
+
+    @ExceptionHandler(AmqpException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Map<String, String> handleAmqpException(AmqpException exception) {
+        return Map.of(
+                "error", "The messaging service is currently unavailable"
+        );
     }
 }
