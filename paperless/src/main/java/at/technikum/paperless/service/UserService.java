@@ -4,7 +4,7 @@ import at.technikum.paperless.dto.in.UserRegisterCreate;
 import at.technikum.paperless.entity.User;
 import at.technikum.paperless.exception.UsernameAlreadyExistsException;
 import at.technikum.paperless.repository.IUserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import at.technikum.paperless.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,8 +59,7 @@ public class UserService implements IUserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("User with ID {} was not found", id);
-                    return new EntityNotFoundException(
-                            "User not found: " + id);
+                    return new ResourceNotFoundException("User", id);
                 });
     }
 
@@ -70,8 +69,7 @@ public class UserService implements IUserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Cannot update user: ID {} was not found", id);
-                    return new EntityNotFoundException(
-                            "User not found: " + id);
+                    return new ResourceNotFoundException("User", id);
                 });
 
         if (!user.getUsername().equals(userIn.getUsername())
@@ -98,8 +96,7 @@ public class UserService implements IUserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Cannot delete user: ID {} was not found", id);
-                    return new EntityNotFoundException(
-                            "User not found: " + id);
+                    return new ResourceNotFoundException("User", id);
                 });
 
         userRepository.delete(user);

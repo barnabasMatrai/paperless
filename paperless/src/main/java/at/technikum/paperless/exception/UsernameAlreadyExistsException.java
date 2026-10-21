@@ -1,10 +1,7 @@
 package at.technikum.paperless.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+public class UsernameAlreadyExistsException extends ServiceException {
 
-@ResponseStatus(HttpStatus.CONFLICT)
-public class UsernameAlreadyExistsException extends RuntimeException {
     public UsernameAlreadyExistsException() {
         super("Username already exists");
     }
