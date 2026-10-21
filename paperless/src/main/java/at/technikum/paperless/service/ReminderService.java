@@ -9,8 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-
+import at.technikum.paperless.exception.ResourceNotFoundException;
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -34,8 +33,7 @@ public class ReminderService implements IReminderService {
         return reminderRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Reminder with ID {} was not found", id);
-                    return new NoSuchElementException(
-                            "Reminder not found: " + id);
+                    return new ResourceNotFoundException("Reminder", id);
                 });
     }
 
@@ -46,7 +44,7 @@ public class ReminderService implements IReminderService {
                 .orElseThrow(() -> {
                     log.warn("Reminder not found for document with ID {}",
                             documentId);
-                    return new NoSuchElementException(
+                    return new ResourceNotFoundException(
                             "Reminder not found for document: " + documentId);
                 });
     }
@@ -58,8 +56,7 @@ public class ReminderService implements IReminderService {
                 .orElseThrow(() -> {
                     log.warn("Cannot create reminder: document with ID {} was not found",
                             documentId);
-                    return new NoSuchElementException(
-                            "Document not found: " + documentId);
+                    return new ResourceNotFoundException("Document", documentId);
                 });
 
         reminder.setDocument(document);
@@ -111,8 +108,7 @@ public class ReminderService implements IReminderService {
         Reminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Cannot delete reminder: ID {} was not found", id);
-                    return new NoSuchElementException(
-                            "Reminder not found: " + id);
+                    return new ResourceNotFoundException("Reminder", id);
                 });
 
         Document document = reminder.getDocument();
