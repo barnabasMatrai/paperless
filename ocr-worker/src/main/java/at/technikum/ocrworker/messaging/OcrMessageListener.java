@@ -12,11 +12,10 @@ import org.springframework.stereotype.Component;
 public class OcrMessageListener {
 
     @RabbitListener(queues = RabbitMQConfig.OCR_QUEUE)
-    public void onMessage(String documentId) {
-        log.info("Received OCR job for document with ID {}", documentId);
+    public void onMessage(UploadDocumentEvent event) {
+        log.info("Received OCR job for document ID {}",
+                event.documentId());
 
-        // TODO Sprint 4: Dokument laden, OCR durchführen, Ergebnis speichern
-
-        log.info("Finished processing OCR job for document with ID {} (no-op)", documentId);
+        // TODO: Perform OCR
     }
 }

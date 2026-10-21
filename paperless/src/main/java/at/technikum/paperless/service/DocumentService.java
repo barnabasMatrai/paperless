@@ -3,7 +3,8 @@ package at.technikum.paperless.service;
 import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.entity.User;
 import at.technikum.paperless.exception.InvalidFileException;
-import at.technikum.paperless.messaging.OcrMessagePublisher;
+import at.technikum.paperless.messaging.UploadDocumentEvent;
+import at.technikum.paperless.messaging.UploadDocumentPublisher;
 import at.technikum.paperless.repository.IDocumentRepository;
 import at.technikum.paperless.repository.IUserRepository;
 import at.technikum.paperless.storage.IFileStorageService;
@@ -29,7 +30,7 @@ public class DocumentService implements IDocumentService {
     private final IDocumentRepository documentRepository;
     private final IUserRepository userRepository;
     private final IFileStorageService fileStorageService;
-    private final OcrMessagePublisher ocrMessagePublisher;
+    private final UploadDocumentPublisher uploadDocumentPublisher;
 
     public List<Document> findAll() {
         log.debug("Fetching all documents");
@@ -87,7 +88,8 @@ public class DocumentService implements IDocumentService {
 
         log.debug("Sending document with ID {} for OCR processing",
                 savedDocument.getId());
-        ocrMessagePublisher.sendDocumentForOcr(savedDocument.getId());
+        UploadDocumentEvent uploadDocumentEvent = new UploadDocumentEvent(savedDocument.getId().toString());
+        uploadDocumentPublisher.publish(uploadDocumentEvent);
 
         log.info("Document with ID {} submitted for OCR processing",
                 savedDocument.getId());
