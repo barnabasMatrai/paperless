@@ -71,6 +71,22 @@ services:
       timeout: 5s
       retries: 10
 
+  ocr-worker:
+    build:
+      context: ../ocr-worker
+      dockerfile: Dockerfile
+    container_name: paperless-ocr-worker
+    restart: unless-stopped
+    depends_on:
+      paperless-mq:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: paperless-mq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: paperless-mq
+      SPRING_RABBITMQ_PASSWORD: paperless-mq
+      SPRING_RABBITMQ_VIRTUAL_HOST: paperless
+
 volumes:
   paperless-db-data:
 
