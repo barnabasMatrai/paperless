@@ -26,12 +26,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      paperless-mq:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: paperless
       DB_USER: paperless
       DB_PASSWORD: paperless
+
+      SPRING_RABBITMQ_HOST: paperless-mq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: paperless-mq
+      SPRING_RABBITMQ_PASSWORD: paperless-mq
+      SPRING_RABBITMQ_VIRTUAL_HOST: paperless
     ports:
       - "8081:8081"
 
@@ -46,5 +54,41 @@ services:
     ports:
       - "80:80"
 
+  # --- Infrastructure: RabbitMQ (public image) -----------------------------------------------
+  paperless-mq:
+    image: rabbitmq:3-management-alpine
+    container_name: paperless-mq-dc
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI (guest:guest, but we override to paperless-mq/paperless-mq below)
+    environment:
+      RABBITMQ_DEFAULT_USER: paperless-mq
+      RABBITMQ_DEFAULT_PASS: paperless-mq
+      RABBITMQ_DEFAULT_VHOST: paperless
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmqctl -q status || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ocr-worker:
+    build:
+      context: ../ocr-worker
+      dockerfile: Dockerfile
+    container_name: paperless-ocr-worker
+    restart: unless-stopped
+    depends_on:
+      paperless-mq:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: paperless-mq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: paperless-mq
+      SPRING_RABBITMQ_PASSWORD: paperless-mq
+      SPRING_RABBITMQ_VIRTUAL_HOST: paperless
+
 volumes:
   paperless-db-data:
+
+
+
