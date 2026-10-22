@@ -13,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import at.technikum.paperless.exception.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Slf4j
@@ -58,8 +58,7 @@ public class DocumentService implements IDocumentService {
         return documentRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Document with ID {} was not found", id);
-                    return new NoSuchElementException(
-                            "Document not found: " + id);
+                    return new ResourceNotFoundException("Document", id);
                 });
     }
 
@@ -73,8 +72,7 @@ public class DocumentService implements IDocumentService {
                 .orElseThrow(() -> {
                     log.warn("Cannot upload document: user with ID {} was not found",
                             userId);
-                    return new NoSuchElementException(
-                            "User not found: " + userId);
+                    return new ResourceNotFoundException("User", userId);
                 });
 
         log.debug("Storing uploaded file");
