@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -23,12 +23,11 @@ export class RegisterComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  showPassword = false;
-  showRepeatPassword = false;
-  loading = false;
-  errorMessage = '';
+  showPassword = signal(false);
+  showRepeatPassword = signal(false);
+  loading = signal(false);
+  errorMessage = signal('');
 
-  
   registerForm = this.fb.nonNullable.group(
     {
       username: ['', [Validators.required, this.noWhitespace]],
@@ -40,19 +39,12 @@ export class RegisterComponent {
           this.noWhitespace,
         ],
       ],
-      repeatPassword: [
-        '',
-        [
-          Validators.required,
-          this.noWhitespace,
-        ],
-      ],
+      repeatPassword: ['', [Validators.required, this.noWhitespace]],
     },
     {
       validators: this.passwordMatchValidator,
     }
   );
-
 
   get username() {
     return this.registerForm.controls.username;
@@ -102,37 +94,36 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid || this.loading) {
+    if (this.registerForm.invalid || this.loading()) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    this.loading.set(true);
+    this.errorMessage.set('');
 
     const { username, password } = this.registerForm.getRawValue();
 
-    this.authService
-      .register({ username, password })
-      .subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/login'], {
-            state: { registeredUsername: username },
-          });
-        },
-        error: (error) => {
-          this.loading = false;
+    this.authService.register({ username, password }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/login'], {
+          state: { registeredUsername: username },
+        });
+      },
+      error: (error) => {
+        this.loading.set(false);
 
-          if (error.status === 409) {
-            this.errorMessage = 'This username is already taken.';
-          } else if (error.status === 400) {
-            this.errorMessage = 'Please check your input.';
-          } else {
-            this.errorMessage =
-              'Registration failed. Please try again later.';
-          }
-        },
-      });
+        if (error.status === 409) {
+          this.errorMessage.set('This username is already taken.');
+        } else if (error.status === 400) {
+          this.errorMessage.set('Please check your input.');
+        } else {
+          this.errorMessage.set(
+            'Registration failed. Please try again later.'
+          );
+        }
+      },
+    });
   }
 }
