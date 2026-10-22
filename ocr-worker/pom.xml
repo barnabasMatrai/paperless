@@ -45,6 +45,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Jackson -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
