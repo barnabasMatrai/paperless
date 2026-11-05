@@ -63,37 +63,12 @@
                    formControlName="password"
                    placeholder="Enter your password"
                    autocomplete="current-password" />
-
-            <button type="button"
-                    class="toggle-password"
-                    (click)="showPassword.set(!showPassword())"
-                    [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
-                <circle cx="12" cy="12" r="3"/>
-                <path *ngIf="showPassword()" d="m3 3 18 18"/>
-              </svg>
-            </button>
           </div>
 
           <small class="error" *ngIf="password.invalid && password.touched">
             Enter your password.
           </small>
         </div>
-
-        <!-- Remember / Forgot -->
-        <div class="form-options">
-          <label class="checkbox">
-            <input type="checkbox" formControlName="rememberMe" />
-            <span class="checkmark"></span>
-            Remember me
-          </label>
-
-          <a routerLink="/forgot-password" class="link">
-            Forgot password?
-          </a>
-        </div>
-
         
         <div class="success-message" *ngIf="successMessage()" role="status">
           {{ successMessage() }}
