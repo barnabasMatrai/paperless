@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class ReminderUpdateCreate {
     @NotNull
-    private LocalDateTime dueDate;
+    private Instant dueDate;
 
     private boolean notified;
 
