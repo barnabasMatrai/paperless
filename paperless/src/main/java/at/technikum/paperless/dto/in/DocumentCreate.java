@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import at.technikum.paperless.model.DocumentType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class DocumentCreate {
@@ -16,5 +16,5 @@ public class DocumentCreate {
     private DocumentType type;
 
     @NotNull
-    private LocalDateTime uploadDate;
+    private Instant uploadDate;
 }

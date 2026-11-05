@@ -24,7 +24,6 @@ import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { DocumentService } from '../../services/document.service';
 import { ReminderService } from '../../services/reminder.service';
 import { ToastService } from '../../services/toast.service';
-import { toLocalDateTime } from '../../utils/date';
 import {
   DOCUMENT_TYPES,
   DOCUMENT_TYPE_LABELS,
@@ -32,13 +31,22 @@ import {
   DocumentType,
 } from '../../models/document';
 import { ReminderPublic } from '../../models/reminder';
+import { toISOString } from '../../utils/date';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
 
-/** datetime-local erwartet yyyy-MM-ddTHH:mm */
-const toInputDateTime = (value: string | Date) =>
-  toLocalDateTime(typeof value === 'string' ? new Date(value) : value).slice(0, 16);
+/** datetime-local erwartet yyyy-MM-ddTHH:mm in lokaler Zeit */
+const toInputDateTime = (value: string | Date) => {
+  const date: Date = typeof value === 'string' ? new Date(value) : value;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+};
 
 /**
  * Dialog zum Hochladen eines neuen Dokuments. Wird `document` übergeben,
@@ -227,7 +235,7 @@ export class UploadDocumentComponent implements OnInit {
       return current ? this.reminderService.delete(current.id).pipe(map(() => null)) : of(null);
     }
 
-    const dueDate = toLocalDateTime(new Date(reminderDueDate));
+    const dueDate = toISOString(new Date(reminderDueDate));
     const description = reminderDescription.trim();
 
     if (!current) {
