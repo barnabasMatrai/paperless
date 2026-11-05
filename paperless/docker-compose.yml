@@ -87,8 +87,20 @@ services:
       SPRING_RABBITMQ_PASSWORD: paperless-mq
       SPRING_RABBITMQ_VIRTUAL_HOST: paperless
 
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: paperless-min
+      MINIO_ROOT_PASSWORD: paperless-min
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
 volumes:
   paperless-db-data:
-
-
-
+  minio-data:
