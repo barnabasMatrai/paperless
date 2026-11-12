@@ -76,9 +76,10 @@ public class DocumentService implements IDocumentService {
                 });
 
         log.debug("Storing uploaded file");
-        fileStorageService.store(file);
+        String storageKey = fileStorageService.store(file);
 
         document.setUser(user);
+        document.setStorageKey(storageKey);
 
         Document savedDocument = documentRepository.save(document);
         log.info("Document with ID {} saved successfully for user with ID {}",
@@ -86,7 +87,7 @@ public class DocumentService implements IDocumentService {
 
         log.debug("Sending document with ID {} for OCR processing",
                 savedDocument.getId());
-        UploadDocumentEvent uploadDocumentEvent = new UploadDocumentEvent(savedDocument.getId().toString());
+        UploadDocumentEvent uploadDocumentEvent = new UploadDocumentEvent(savedDocument.getId().toString(), storageKey);
         uploadDocumentPublisher.publish(uploadDocumentEvent);
 
         log.info("Document with ID {} submitted for OCR processing",
