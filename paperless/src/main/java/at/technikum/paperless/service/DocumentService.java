@@ -3,21 +3,26 @@ package at.technikum.paperless.service;
 import at.technikum.paperless.entity.Document;
 import at.technikum.paperless.entity.User;
 import at.technikum.paperless.exception.InvalidFileException;
+import at.technikum.paperless.exception.ResourceNotFoundException;
 import at.technikum.paperless.messaging.UploadDocumentEvent;
 import at.technikum.paperless.messaging.UploadDocumentPublisher;
 import at.technikum.paperless.repository.IDocumentRepository;
 import at.technikum.paperless.repository.IUserRepository;
+import at.technikum.paperless.search.DocumentSearchService;
 import at.technikum.paperless.storage.IFileStorageService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import at.technikum.paperless.exception.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,6 +36,7 @@ public class DocumentService implements IDocumentService {
     private final IUserRepository userRepository;
     private final IFileStorageService fileStorageService;
     private final UploadDocumentPublisher uploadDocumentPublisher;
+    private final DocumentSearchService documentSearchService;
 
     public List<Document> findAll() {
         log.debug("Fetching all documents");
@@ -50,6 +56,31 @@ public class DocumentService implements IDocumentService {
         log.debug("Retrieved {} documents for user with ID {}",
                 documents.size(), userId);
         return documents;
+    }
+
+
+
+    @Override
+    public List<Document> search(Long userId, String query) {
+        if (query == null || query.isBlank()) {
+            return findAllByUserId(userId);
+        }
+
+        log.debug("Searching documents of user {} for '{}'", userId, query);
+        List<Long> ids = documentSearchService.searchDocumentIds(query.trim());
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        // Nur Dokumente des eingeloggten Users zurückgeben, Reihenfolge = Relevanz aus Elasticsearch
+        Map<Long, Document> byId = documentRepository.findAllById(ids).stream()
+                .filter(doc -> doc.getUser().getId().equals(userId))
+                .collect(Collectors.toMap(Document::getId, Function.identity()));
+
+        return ids.stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public Document findById(Long id) {
@@ -75,7 +106,7 @@ public class DocumentService implements IDocumentService {
                     return new ResourceNotFoundException("User", userId);
                 });
 
-        log.debug("Storing uploaded file");
+        log.debug("Storing uploaded file in MinIO");
         String storageKey = fileStorageService.store(file);
 
         document.setUser(user);
@@ -87,7 +118,8 @@ public class DocumentService implements IDocumentService {
 
         log.debug("Sending document with ID {} for OCR processing",
                 savedDocument.getId());
-        UploadDocumentEvent uploadDocumentEvent = new UploadDocumentEvent(savedDocument.getId().toString(), storageKey);
+        UploadDocumentEvent uploadDocumentEvent =
+                new UploadDocumentEvent(savedDocument.getId().toString(), storageKey);
         uploadDocumentPublisher.publish(uploadDocumentEvent);
 
         log.info("Document with ID {} submitted for OCR processing",
@@ -127,7 +159,7 @@ public class DocumentService implements IDocumentService {
         String originalName = file.getOriginalFilename();
         String extension = originalName != null && originalName.contains(".")
                 ? originalName.substring(originalName.lastIndexOf('.') + 1)
-                .toLowerCase(Locale.ROOT)
+                  .toLowerCase(Locale.ROOT)
                 : "";
 
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
