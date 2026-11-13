@@ -89,6 +89,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      elasticsearch:
+        condition: service_healthy
     environment:
       SPRING_RABBITMQ_HOST: paperless-mq
       SPRING_RABBITMQ_PORT: 5672
@@ -100,6 +102,8 @@ services:
       MINIO_ACCESS_KEY: paperless-min
       MINIO_SECRET_KEY: paperless-min
       MINIO_BUCKET: documents
+
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
 
   # --- Infrastructure: MinIO (Object Storage) ------------------------------------------------
   minio:
@@ -116,6 +120,26 @@ services:
       - minio-data:/data
     restart: unless-stopped
 
+  # --- Infrastructure: Elasticsearch (Volltextsuche) -----------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.5
+    container_name: paperless-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"   # REST API
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -qv '\"status\":\"red\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
 volumes:
   paperless-db-data:
   minio-data:
+  es-data:
