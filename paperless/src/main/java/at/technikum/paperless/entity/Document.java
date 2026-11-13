@@ -24,6 +24,10 @@ public class Document {
     @Column(nullable = false)
     private String filename;
 
+    // Schlüssel des Objekts in MinIO (wird vom OCR-Worker zum Download gebraucht)
+    @Column(name = "storage_key", unique = true)
+    private String storageKey;
+
     @Column(nullable = false)
     private Instant uploadDate = Instant.now();
 

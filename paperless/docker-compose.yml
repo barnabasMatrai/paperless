@@ -28,6 +28,8 @@ services:
         condition: service_healthy
       paperless-mq:
         condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -40,6 +42,11 @@ services:
       SPRING_RABBITMQ_USERNAME: paperless-mq
       SPRING_RABBITMQ_PASSWORD: paperless-mq
       SPRING_RABBITMQ_VIRTUAL_HOST: paperless
+
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: paperless-min
+      MINIO_SECRET_KEY: paperless-min
+      MINIO_BUCKET: documents
     ports:
       - "8081:8081"
 
@@ -80,6 +87,8 @@ services:
     depends_on:
       paperless-mq:
         condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       SPRING_RABBITMQ_HOST: paperless-mq
       SPRING_RABBITMQ_PORT: 5672
@@ -87,8 +96,26 @@ services:
       SPRING_RABBITMQ_PASSWORD: paperless-mq
       SPRING_RABBITMQ_VIRTUAL_HOST: paperless
 
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: paperless-min
+      MINIO_SECRET_KEY: paperless-min
+      MINIO_BUCKET: documents
+
+  # --- Infrastructure: MinIO (Object Storage) ------------------------------------------------
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web Console
+    environment:
+      MINIO_ROOT_USER: paperless-min
+      MINIO_ROOT_PASSWORD: paperless-min
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
 volumes:
   paperless-db-data:
-
-
-
+  minio-data:
