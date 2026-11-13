@@ -13,8 +13,8 @@ import { ReminderPublic } from '../../models/reminder';
 import { DocumentService } from '../../services/document.service';
 import { ReminderService } from '../../services/reminder.service';
 import { ToastService } from '../../services/toast.service';
-import { toLocalDateTime } from '../../utils/date';
 import { AuthService } from '../../services/auth.service';
+import { toISOString } from '../../utils/date';
 
 export type FileType = 'PDF' | 'DOCX' | 'JPG' | 'PNG';
 
@@ -323,7 +323,7 @@ export class DashboardComponent {
       id: doc.id,
       filename: doc.title,
       type: doc.category,
-      uploadDate: toLocalDateTime(doc.uploadedAt),
+      uploadDate: toISOString(doc.uploadedAt),
       reminder: doc.reminder,
     };
   }

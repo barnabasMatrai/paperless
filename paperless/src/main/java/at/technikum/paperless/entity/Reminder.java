@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "reminders")
@@ -24,7 +24,7 @@ public class Reminder {
     private String description;
 
     @Column(nullable = false)
-    private LocalDateTime dueDate;
+    private Instant dueDate;
 
     @Column(nullable = false)
     private boolean notified = false;

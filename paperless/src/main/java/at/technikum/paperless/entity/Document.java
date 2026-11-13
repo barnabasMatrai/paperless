@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "documents")
@@ -25,7 +25,7 @@ public class Document {
     private String filename;
 
     @Column(nullable = false)
-    private LocalDateTime uploadDate = LocalDateTime.now();
+    private Instant uploadDate = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
