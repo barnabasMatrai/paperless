@@ -1,5 +1,6 @@
 package at.technikum.paperless.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-        } catch (JwtException e) {
+        } catch (JwtException | JWTVerificationException e) {
             SecurityContextHolder.clearContext();
         }
 

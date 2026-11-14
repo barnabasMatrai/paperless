@@ -3,12 +3,15 @@ package at.technikum.paperless;
 import at.technikum.paperless.dto.in.AuthCreate;
 import at.technikum.paperless.dto.in.UserRegisterCreate;
 import at.technikum.paperless.dto.out.AuthPublic;
+import at.technikum.paperless.dto.out.UserLoginPublic;
 import at.technikum.paperless.dto.out.UserPublic;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import at.technikum.paperless.config.SecurityConfig;
 import org.springframework.context.annotation.Import;
@@ -106,22 +109,19 @@ public class UserControllerTests {
         body.setUsername("LoginUser");
         body.setPassword("secret");
 
-        AuthPublic result = webTestClient
+        webTestClient
                 .post()
                 .uri("/api/auth/login")
                 .bodyValue(body)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(AuthPublic.class)
-                .returnResult()
-                .getResponseBody();
-
-        Assertions.assertThat(result).isNotNull();
-        Assertions.assertThat(result.getAccessToken()).isNotBlank();
-        Assertions.assertThat(result.getUser()).isNotNull();
-        Assertions.assertThat(result.getUser().getUsername())
-                .isEqualTo("LoginUser");
+                .expectStatus().isOk()
+                .expectHeader().exists(HttpHeaders.SET_COOKIE)
+                .expectBody(UserLoginPublic.class)
+                .value(user -> {
+                    Assertions.assertThat(user).isNotNull();
+                    Assertions.assertThat(user.getUsername())
+                            .isEqualTo("LoginUser");
+                });
     }
 
     @Test
@@ -284,24 +284,24 @@ public class UserControllerTests {
 
         createUser(webTestClient, username, password);
 
-        AuthCreate login = new AuthCreate();
-        login.setUsername(username);
-        login.setPassword(password);
+        AuthCreate body = new AuthCreate();
+        body.setUsername(username);
+        body.setPassword(password);
 
-        AuthPublic response = webTestClient
+        var result = webTestClient
                 .post()
                 .uri("/api/auth/login")
-                .bodyValue(login)
+                .bodyValue(body)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(AuthPublic.class)
-                .returnResult()
-                .getResponseBody();
+                .returnResult(UserLoginPublic.class);
 
-        Assertions.assertThat(response).isNotNull();
-        Assertions.assertThat(response.getAccessToken()).isNotBlank();
+        ResponseCookie cookie = result.getResponseCookies()
+                .getFirst("accessToken");
 
-        return response.getAccessToken();
+        Assertions.assertThat(cookie).isNotNull();
+
+        return cookie.getValue();
     }
 }
