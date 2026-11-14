@@ -2,6 +2,7 @@ package at.technikum.ocrworker.messaging;
 
 import at.technikum.ocrworker.config.RabbitMQConfig;
 import at.technikum.ocrworker.exception.OcrProcessingException;
+import at.technikum.ocrworker.search.SearchIndexService;
 import at.technikum.ocrworker.service.OcrService;
 import at.technikum.ocrworker.storage.MinioDocumentStorage;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Path;
 
 /**
- * Empfängt OCR-Jobs aus der Queue, lädt das Originaldokument aus MinIO
- * und führt darauf die Texterkennung aus.
+ * Empfängt OCR-Jobs aus der Queue, lädt das Originaldokument aus MinIO,
+ * führt die Texterkennung aus und speichert den Text in Elasticsearch.
  */
 @Slf4j
 @Component
@@ -23,6 +24,7 @@ public class OcrMessageListener {
 
     private final MinioDocumentStorage documentStorage;
     private final OcrService ocrService;
+    private final SearchIndexService searchIndexService;
 
     @RabbitListener(queues = RabbitMQConfig.OCR_QUEUE)
     public void onMessage(UploadDocumentEvent event) {
@@ -52,7 +54,7 @@ public class OcrMessageListener {
             log.info("OCR for document ID {} finished: {} characters recognized", documentId, text.length());
             log.debug("OCR text for document ID {}:\n{}", documentId, text);
 
-            // TODO Sprint 4 (Punkt 6): Text in Elasticsearch indexieren
+            searchIndexService.index(documentId, text);
 
             log.info("Finished processing OCR job for document ID {}", documentId);
 

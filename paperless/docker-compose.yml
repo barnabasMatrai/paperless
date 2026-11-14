@@ -30,6 +30,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      elasticsearch:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -47,6 +49,8 @@ services:
       MINIO_ACCESS_KEY: paperless-min
       MINIO_SECRET_KEY: paperless-min
       MINIO_BUCKET: documents
+
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
     ports:
       - "8081:8081"
 
