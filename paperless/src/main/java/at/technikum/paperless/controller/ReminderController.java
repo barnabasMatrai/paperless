@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("isAuthenticated()")
 @AllArgsConstructor
 @RequestMapping("/api/reminders")
-@CrossOrigin
 @SecurityRequirement(name = "bearerAuth")
 public class ReminderController {
 
