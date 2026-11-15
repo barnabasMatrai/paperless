@@ -23,7 +23,6 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/documents")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin
 public class DocumentController {
     private final IDocumentService documentService;
     private final IDocumentMapper documentMapper;
