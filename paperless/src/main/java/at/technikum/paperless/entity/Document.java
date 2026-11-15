@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "documents")
@@ -24,8 +24,12 @@ public class Document {
     @Column(nullable = false)
     private String filename;
 
+    // Schlüssel des Objekts in MinIO (wird vom OCR-Worker zum Download gebraucht)
+    @Column(name = "storage_key", unique = true)
+    private String storageKey;
+
     @Column(nullable = false)
-    private LocalDateTime uploadDate = LocalDateTime.now();
+    private Instant uploadDate = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

@@ -20,7 +20,6 @@ import java.time.Duration;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/auth")
-@CrossOrigin
 public class AuthController {
     private final IAuthService authService;
 

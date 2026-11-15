@@ -13,8 +13,8 @@ import { ReminderPublic } from '../../models/reminder';
 import { DocumentService } from '../../services/document.service';
 import { ReminderService } from '../../services/reminder.service';
 import { ToastService } from '../../services/toast.service';
-import { toLocalDateTime } from '../../utils/date';
 import { AuthService } from '../../services/auth.service';
+import { toISOString } from '../../utils/date';
 
 export type FileType = 'PDF' | 'DOCX' | 'JPG' | 'PNG';
 
@@ -62,6 +62,8 @@ export class DashboardComponent {
 
   readonly searchInput = signal('');
   readonly searchTerm = signal('');
+  /** IDs der Dokumente, deren Inhalt (OCR-Text) zur Suche passt; null = keine Volltextsuche aktiv */
+  readonly contentMatchIds = signal<Set<number> | null>(null);
   readonly typeFilter = signal<FileType | 'all'>('all');
   readonly categoryFilter = signal<DocumentType | 'all'>('all');
   readonly dateFilter = signal<DateFilter>('all');
@@ -84,6 +86,7 @@ export class DashboardComponent {
 
   readonly filteredDocuments = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
+    const contentIds = this.contentMatchIds();
     const type = this.typeFilter();
     const category = this.categoryFilter();
     const minDate = this.minDate(this.dateFilter());
@@ -92,7 +95,8 @@ export class DashboardComponent {
       (doc) =>
         (!term ||
           doc.title.toLowerCase().includes(term) ||
-          this.categoryLabels[doc.category].toLowerCase().includes(term)) &&
+          this.categoryLabels[doc.category].toLowerCase().includes(term) ||
+          !!contentIds?.has(doc.id)) &&
         (type === 'all' || doc.type === type) &&
         (category === 'all' || doc.category === category) &&
         (!minDate || doc.uploadedAt >= minDate),
@@ -157,9 +161,28 @@ export class DashboardComponent {
     return new Date(reminder.dueDate) <= new Date();
   }
 
+  /** Sucht lokal in Titel/Kategorie und zusätzlich per Volltextsuche im OCR-Text (Backend). */
   onSearch(): void {
-    this.searchTerm.set(this.searchInput());
+    const term = this.searchInput().trim();
+    this.searchTerm.set(term);
     this.page.set(1);
+
+    if (!term) {
+      this.contentMatchIds.set(null);
+      return;
+    }
+
+    this.documentService.search(term).subscribe({
+      next: (docs) => this.contentMatchIds.set(new Set(docs.map((d) => d.id))),
+      error: () => {
+        this.contentMatchIds.set(null);
+        this.toastService.show({
+          type: 'error',
+          title: 'Volltextsuche fehlgeschlagen',
+          message: 'Es wurde nur in Titel und Kategorie gesucht.',
+        });
+      },
+    });
   }
 
   onFilterChange(): void {
@@ -169,6 +192,7 @@ export class DashboardComponent {
   clearFilters(): void {
     this.searchInput.set('');
     this.searchTerm.set('');
+    this.contentMatchIds.set(null);
     this.typeFilter.set('all');
     this.categoryFilter.set('all');
     this.dateFilter.set('all');
@@ -323,7 +347,7 @@ export class DashboardComponent {
       id: doc.id,
       filename: doc.title,
       type: doc.category,
-      uploadDate: toLocalDateTime(doc.uploadedAt),
+      uploadDate: toISOString(doc.uploadedAt),
       reminder: doc.reminder,
     };
   }

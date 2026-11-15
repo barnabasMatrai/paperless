@@ -23,7 +23,6 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/documents")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin
 public class DocumentController {
     private final IDocumentService documentService;
     private final IDocumentMapper documentMapper;
@@ -61,6 +60,15 @@ public class DocumentController {
     public DocumentPublic update(@PathVariable Long id, @Valid @RequestBody DocumentCreate documentIn) {
         Document updated = documentService.update(id, documentMapper.toEntity(documentIn));
         return documentMapper.toObject(updated);
+    }
+
+    @GetMapping("/search")
+    public List<DocumentPublic> search(@RequestParam("q") String query, Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return documentService.search(userId, query).stream()
+                .map(documentMapper::toObject)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

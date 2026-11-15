@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from '../api.config';
 import { DocumentCreate, DocumentPublic, DocumentUpload } from '../models/document';
@@ -20,6 +20,12 @@ export class DocumentService {
     // Als JSON-Blob, damit Spring den Part per @RequestPart in das DTO umwandeln kann
     body.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     return this.http.post<DocumentPublic>(this.baseUrl, body);
+  }
+
+  /** Volltextsuche im OCR-Text (Elasticsearch) */
+  search(query: string): Observable<DocumentPublic[]> {
+    const params = new HttpParams().set('q', query);
+    return this.http.get<DocumentPublic[]>(`${this.baseUrl}/search`, { params });
   }
 
   update(id: number, document: DocumentCreate): Observable<DocumentPublic> {

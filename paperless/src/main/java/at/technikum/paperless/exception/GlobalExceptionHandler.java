@@ -1,6 +1,7 @@
 package at.technikum.paperless.exception;
 
 import at.technikum.paperless.messaging.MessagePublishException;
+import at.technikum.paperless.search.SearchException;
 import at.technikum.paperless.storage.FileStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -152,6 +153,15 @@ public class GlobalExceptionHandler {
 
         log.warn("Authentication error: {}", exception.getMessage());
         return Map.of("error", "Unauthorized");
+    }
+
+    // ==================== Search ====================
+
+    @ExceptionHandler(SearchException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Map<String, String> handleSearch(SearchException exception) {
+        log.error("Search error: {}", exception.getMessage(), exception);
+        return Map.of("error", "The search service is currently unavailable");
     }
 
     // ==================== Catch-all ====================

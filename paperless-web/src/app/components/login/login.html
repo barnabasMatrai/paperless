@@ -80,20 +80,6 @@
             Enter your password.
           </small>
         </div>
-
-        <!-- Remember / Forgot -->
-        <div class="form-options">
-          <label class="checkbox">
-            <input type="checkbox" formControlName="rememberMe" />
-            <span class="checkmark"></span>
-            Remember me
-          </label>
-
-          <a routerLink="/forgot-password" class="link">
-            Forgot password?
-          </a>
-        </div>
-
         
         <div class="success-message" *ngIf="successMessage()" role="status">
           {{ successMessage() }}

@@ -8,4 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UploadDocumentEvent {
     private String documentId;
+    private String storageKey;
+
 }
