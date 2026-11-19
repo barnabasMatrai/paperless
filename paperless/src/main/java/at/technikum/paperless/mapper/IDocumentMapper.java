@@ -1,6 +1,7 @@
 package at.technikum.paperless.mapper;
 
 import at.technikum.paperless.dto.in.DocumentCreate;
+import at.technikum.paperless.dto.in.DocumentUpdateCreate;
 import at.technikum.paperless.dto.in.DocumentUploadCreate;
 import at.technikum.paperless.dto.out.DocumentPublic;
 import at.technikum.paperless.entity.Document;
@@ -18,6 +19,10 @@ public interface IDocumentMapper {
     @Mapping(source = "type", target = "documentType")
     @Mapping(target = "user", ignore = true)
     Document toEntity(DocumentUploadCreate documentIn);
+
+    @Mapping(source = "type", target = "documentType")
+    @Mapping(target = "user", ignore = true)
+    Document toEntity(DocumentUpdateCreate documentIn);
 
     @Mapping(source = "documentType", target = "type")
     DocumentPublic toObject(Document document);

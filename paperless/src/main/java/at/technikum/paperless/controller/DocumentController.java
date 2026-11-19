@@ -1,6 +1,7 @@
 package at.technikum.paperless.controller;
 
 import at.technikum.paperless.dto.in.DocumentCreate;
+import at.technikum.paperless.dto.in.DocumentUpdateCreate;
 import at.technikum.paperless.dto.in.DocumentUploadCreate;
 import at.technikum.paperless.dto.out.DocumentPublic;
 import at.technikum.paperless.entity.Document;
@@ -57,7 +58,7 @@ public class DocumentController {
 
     @PutMapping("/{id}")
     @PreAuthorize("@documentSecurity.isOwner(#id, authentication)")
-    public DocumentPublic update(@PathVariable Long id, @Valid @RequestBody DocumentCreate documentIn) {
+    public DocumentPublic update(@PathVariable Long id, @Valid @RequestBody DocumentUpdateCreate documentIn) {
         Document updated = documentService.update(id, documentMapper.toEntity(documentIn));
         return documentMapper.toObject(updated);
     }
