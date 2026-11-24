@@ -1,4 +1,4 @@
-package at.technikum.ocrworker.search;
+package at.technikum.paperless.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +23,7 @@ import java.time.Instant;
 @Document(indexName = "documents")
 public class OcrDocument {
 
-    // Gleiche ID wie in Postgres, damit ein Suchtreffer direkt dem Dokument zugeordnet werden kann
+    // Gleiche ID wie in Postgres, damit ein Suchergebnis direkt dem Dokument zugeordnet werden kann
     @Id
     private String id;
 

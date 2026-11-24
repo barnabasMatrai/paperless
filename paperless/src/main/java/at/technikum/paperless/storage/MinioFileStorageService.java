@@ -4,6 +4,9 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.errors.ErrorResponseException;
+import io.minio.messages.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -67,6 +70,39 @@ public class MinioFileStorageService implements IFileStorageService {
             log.info("MinIO-Bucket '{}' angelegt", bucket);
         }
         bucketReady = true;
+    }
+
+    @Override
+    public void delete(String storageKey) {
+        if (storageKey == null || storageKey.isBlank()) {
+            log.warn("Kann keine Datei in MinIO löschen: storageKey ist leer");
+            return;
+        }
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(properties.getBucket())
+                    .object(storageKey)
+                    .build());
+            log.info("Datei in MinIO gelöscht: bucket={}, key={}",
+                    properties.getBucket(), storageKey);
+        } catch (ErrorResponseException e) {
+            if (isNotFound(e)) {
+                // Bereits weg (wurde z. B. manuell entfernt) – Löschen ist idempotent
+                log.warn("Datei in MinIO war bereits weg: bucket={}, key={}",
+                        properties.getBucket(), storageKey);
+            } else {
+                throw new FileStorageException(
+                        "Datei '" + storageKey + "' konnte nicht in MinIO gelöscht werden", e);
+            }
+        } catch (Exception e) {
+            throw new FileStorageException(
+                    "Datei '" + storageKey + "' konnte nicht in MinIO gelöscht werden", e);
+        }
+    }
+
+    private static boolean isNotFound(ErrorResponseException e) {
+        ErrorResponse response = e.errorResponse();
+        return response != null && "NoSuchKey".equals(response.code());
     }
 
     private static String extensionOf(String filename) {
