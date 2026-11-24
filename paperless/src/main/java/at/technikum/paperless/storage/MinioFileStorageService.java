@@ -34,13 +34,13 @@ public class MinioFileStorageService implements IFileStorageService {
                 ? file.contentType()
                 : DEFAULT_CONTENT_TYPE;
 
-        try (InputStream in = file.content()) {
+        try (InputStream fileContent = file.content()) {
             ensureBucketExists();
 
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(properties.getBucket())
                     .object(key)
-                    .stream(in, file.size(), -1)
+                    .stream(fileContent, file.size(), -1)
                     .contentType(contentType)
                     .build());
 
