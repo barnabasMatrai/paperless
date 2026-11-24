@@ -10,7 +10,6 @@ import io.minio.messages.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.Locale;
@@ -29,31 +28,29 @@ public class MinioFileStorageService implements IFileStorageService {
     private volatile boolean bucketReady = false;
 
     @Override
-    public String store(MultipartFile file) {
-        String key = UUID.randomUUID() + extensionOf(file.getOriginalFilename());
-        String contentType = file.getContentType() != null
-                ? file.getContentType()
+    public String store(FileUpload file) {
+        String key = UUID.randomUUID() + extensionOf(file.filename());
+        String contentType = file.contentType() != null
+                ? file.contentType()
                 : DEFAULT_CONTENT_TYPE;
 
-        try (InputStream in = file.getInputStream()) {
+        try (InputStream in = file.content()) {
             ensureBucketExists();
 
-            // Entspricht uploadObject(...) aus den Folien, nur mit Stream statt lokalem Pfad,
-            // weil der Upload als MultipartFile im Speicher ankommt.
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(properties.getBucket())
                     .object(key)
-                    .stream(in, file.getSize(), -1)
+                    .stream(in, file.size(), -1)
                     .contentType(contentType)
                     .build());
 
             log.info("Datei in MinIO gespeichert: bucket={}, key={}, name={}, size={} bytes",
-                    properties.getBucket(), key, file.getOriginalFilename(), file.getSize());
+                    properties.getBucket(), key, file.filename(), file.size());
             return key;
 
         } catch (Exception e) {
             throw new FileStorageException(
-                    "Datei '" + file.getOriginalFilename() + "' konnte nicht in MinIO gespeichert werden", e);
+                    "Datei '" + file.filename() + "' konnte nicht in MinIO gespeichert werden", e);
         }
     }
 
