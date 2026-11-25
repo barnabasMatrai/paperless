@@ -32,6 +32,12 @@ services:
         condition: service_started
       elasticsearch:
         condition: service_healthy
+      # Erst starten, damit die ocr.results-Exchange (Fanout) des OCR-Workers
+      # existiert, bevor die Queue ocr.results.index und die Bindung angelegt
+      # werden. Deklariert wird die Exchange einmalig durch den OCR-Worker,
+      # die Queue und Bindung hier (vgl. RabbitMQConfig in der paperless-API).
+      ocr-worker:
+        condition: service_started
     environment:
       DB_HOST: db
       DB_PORT: 5432

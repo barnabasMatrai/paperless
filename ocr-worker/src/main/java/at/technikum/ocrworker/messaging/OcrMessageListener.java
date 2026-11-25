@@ -2,7 +2,6 @@ package at.technikum.ocrworker.messaging;
 
 import at.technikum.ocrworker.config.RabbitMQConfig;
 import at.technikum.ocrworker.exception.OcrProcessingException;
-import at.technikum.ocrworker.search.SearchIndexService;
 import at.technikum.ocrworker.service.OcrService;
 import at.technikum.ocrworker.storage.MinioDocumentStorage;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +13,12 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Path;
 
 /**
- * Empfängt OCR-Jobs aus der Queue, lädt das Originaldokument aus MinIO,
- * führt die Texterkennung aus und speichert den Text in Elasticsearch.
+ * Empfängt OCR-Jobs aus der Queue, lädt das Originaldokument aus MinIO und
+ * führt die Texterkennung aus. Das Ergebnis wird weiterveröffentlicht: Der Text
+ * selbst wird nicht von diesem Worker in Elasticsearch geschrieben, sondern der
+ * Indexing-Listener in der paperless-API (Consumer auf "ocr.results.index")
+ * schreibt ihn. So wird das Indizieren retry-fähig, ohne OCR erneut laufen zu
+ * lassen.
  */
 @Slf4j
 @Component
@@ -24,7 +27,7 @@ public class OcrMessageListener {
 
     private final MinioDocumentStorage documentStorage;
     private final OcrService ocrService;
-    private final SearchIndexService searchIndexService;
+    private final OcrResultPublisher ocrResultPublisher;
 
     @RabbitListener(queues = RabbitMQConfig.OCR_QUEUE)
     public void onMessage(UploadDocumentEvent event) {
@@ -54,7 +57,7 @@ public class OcrMessageListener {
             log.info("OCR for document ID {} finished: {} characters recognized", documentId, text.length());
             log.debug("OCR text for document ID {}:\n{}", documentId, text);
 
-            searchIndexService.index(documentId, text);
+            ocrResultPublisher.publish(new OcrDocumentEvent(documentId, text));
 
             log.info("Finished processing OCR job for document ID {}", documentId);
 

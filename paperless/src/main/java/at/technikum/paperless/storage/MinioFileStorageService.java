@@ -4,10 +4,12 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.errors.ErrorResponseException;
+import io.minio.messages.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.Locale;
@@ -26,31 +28,29 @@ public class MinioFileStorageService implements IFileStorageService {
     private volatile boolean bucketReady = false;
 
     @Override
-    public String store(MultipartFile file) {
-        String key = UUID.randomUUID() + extensionOf(file.getOriginalFilename());
-        String contentType = file.getContentType() != null
-                ? file.getContentType()
+    public String store(FileUpload file) {
+        String key = UUID.randomUUID() + extensionOf(file.filename());
+        String contentType = file.contentType() != null
+                ? file.contentType()
                 : DEFAULT_CONTENT_TYPE;
 
-        try (InputStream in = file.getInputStream()) {
+        try (InputStream fileContent = file.content()) {
             ensureBucketExists();
 
-            // Entspricht uploadObject(...) aus den Folien, nur mit Stream statt lokalem Pfad,
-            // weil der Upload als MultipartFile im Speicher ankommt.
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(properties.getBucket())
                     .object(key)
-                    .stream(in, file.getSize(), -1)
+                    .stream(fileContent, file.size(), -1)
                     .contentType(contentType)
                     .build());
 
             log.info("Datei in MinIO gespeichert: bucket={}, key={}, name={}, size={} bytes",
-                    properties.getBucket(), key, file.getOriginalFilename(), file.getSize());
+                    properties.getBucket(), key, file.filename(), file.size());
             return key;
 
         } catch (Exception e) {
             throw new FileStorageException(
-                    "Datei '" + file.getOriginalFilename() + "' konnte nicht in MinIO gespeichert werden", e);
+                    "Datei '" + file.filename() + "' konnte nicht in MinIO gespeichert werden", e);
         }
     }
 
@@ -67,6 +67,39 @@ public class MinioFileStorageService implements IFileStorageService {
             log.info("MinIO-Bucket '{}' angelegt", bucket);
         }
         bucketReady = true;
+    }
+
+    @Override
+    public void delete(String storageKey) {
+        if (storageKey == null || storageKey.isBlank()) {
+            log.warn("Kann keine Datei in MinIO löschen: storageKey ist leer");
+            return;
+        }
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(properties.getBucket())
+                    .object(storageKey)
+                    .build());
+            log.info("Datei in MinIO gelöscht: bucket={}, key={}",
+                    properties.getBucket(), storageKey);
+        } catch (ErrorResponseException e) {
+            if (isNotFound(e)) {
+                // Bereits weg (wurde z. B. manuell entfernt) – Löschen ist idempotent
+                log.warn("Datei in MinIO war bereits weg: bucket={}, key={}",
+                        properties.getBucket(), storageKey);
+            } else {
+                throw new FileStorageException(
+                        "Datei '" + storageKey + "' konnte nicht in MinIO gelöscht werden", e);
+            }
+        } catch (Exception e) {
+            throw new FileStorageException(
+                    "Datei '" + storageKey + "' konnte nicht in MinIO gelöscht werden", e);
+        }
+    }
+
+    private static boolean isNotFound(ErrorResponseException e) {
+        ErrorResponse response = e.errorResponse();
+        return response != null && "NoSuchKey".equals(response.code());
     }
 
     private static String extensionOf(String filename) {

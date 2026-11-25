@@ -33,10 +33,15 @@ public class DocumentSearchService {
                             .index(INDEX)
                             .size(MAX_RESULTS)
                             .source(src -> src.fetch(false))
-                            .query(q -> q.match(m -> m
-                                    .field("content")
-                                    .query(query)
-                                    .fuzziness("AUTO"))),   // toleriert kleine OCR-/Tippfehler
+                            .query(q -> q.bool(b -> b
+                                    // Fuzzy Match (Rechtschreibfehler) oder Präfix-Match (Teilwörter)
+                                    .should(sb -> sb.match(m -> m
+                                            .field("content")
+                                            .query(query)
+                                            .fuzziness("AUTO")))
+                                    .should(sp -> sp.matchPhrasePrefix(m -> m
+                                            .field("content")
+                                            .query(query))))),
                     Void.class);
 
             List<Long> ids = response.hits().hits().stream()
