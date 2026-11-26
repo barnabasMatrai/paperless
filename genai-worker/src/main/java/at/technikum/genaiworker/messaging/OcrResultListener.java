@@ -1,6 +1,9 @@
 package at.technikum.genaiworker.messaging;
 
 import at.technikum.genaiworker.config.RabbitMQConfig;
+import at.technikum.genaiworker.genai.GenAiException;
+import at.technikum.genaiworker.genai.GeminiClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -9,7 +12,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OcrResultListener {
+
+    private final GeminiClient geminiClient;
 
     @RabbitListener(queues = RabbitMQConfig.OCR_RESULTS_GENAI_QUEUE)
     public void onMessage(OcrDocumentEvent event) {
@@ -30,9 +36,21 @@ public class OcrResultListener {
             return;
         }
 
-        // Sprint 5, Schritt 3: Text an Google Gemini senden und Zusammenfassung erhalten.
-        // Schritt 4: Zusammenfassung an die REST-API zurückgeben und in der DB speichern.
+        String summary;
+        try {
+            summary = geminiClient.summarize(text);
+        } catch (GenAiException e) {
+            log.error("Could not create summary for document ID {}: {}", documentId, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(
+                    "Summary generation failed for document ID " + documentId, e);
+        }
+
+        log.info("Summary for document ID {} created ({} characters): {}", documentId, summary.length(), summary);
+
+        // Aufgabe 4: Zusammenfassung an die REST-API übergeben und in der DB speichern.
 
         log.info("Finished processing OCR result for document ID {}", documentId);
+
+
     }
 }

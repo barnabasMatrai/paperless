@@ -134,6 +134,7 @@ services:
 
       # Wird aus der Datei .env neben dieser docker-compose.yml gelesen (nicht ins Repo committen)
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
 
   # --- Infrastructure: MinIO (Object Storage) ------------------------------------------------
   minio:
