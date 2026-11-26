@@ -195,4 +195,24 @@ class DocumentServiceTest {
 
         assertThat(documentService.search(3L, "bayern")).containsExactly(docA, docB);
     }
+
+    @Test
+    void saveSummaryStoresSummaryOnDocument() {
+        when(documentRepository.findById(7L)).thenReturn(Optional.of(document));
+        when(documentRepository.save(document)).thenReturn(document);
+
+        Document result = documentService.saveSummary(7L, "Eine kurze Zusammenfassung.");
+
+        assertThat(result.getSummary()).isEqualTo("Eine kurze Zusammenfassung.");
+        verify(documentRepository).save(document);
+    }
+
+    @Test
+    void saveSummaryThrowsWhenDocumentDoesNotExist() {
+        when(documentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> documentService.saveSummary(99L, "Zusammenfassung"))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verify(documentRepository, never()).save(document);
+    }
 }

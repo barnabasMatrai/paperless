@@ -28,6 +28,10 @@ public class Document {
     @Column(name = "storage_key", unique = true)
     private String storageKey;
 
+    // Von GenAI (Gemini) erzeugte Zusammenfassung des OCR-Textes; null, solange noch keine vorliegt
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+
     @Column(nullable = false)
     private Instant uploadDate = Instant.now();
 

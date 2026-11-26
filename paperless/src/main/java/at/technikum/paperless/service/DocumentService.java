@@ -139,6 +139,19 @@ public class DocumentService implements IDocumentService {
 
     @Override
     @Transactional
+    public Document saveSummary(Long id, String summary) {
+        log.info("Saving summary for document with ID {}", id);
+
+        Document document = findById(id);
+        document.setSummary(summary);
+        Document savedDocument = documentRepository.save(document);
+
+        log.info("Summary for document with ID {} saved ({} characters)", id, summary.length());
+        return savedDocument;
+    }
+
+    @Override
+    @Transactional
     public void deleteById(Long id) {
         log.info("Deleting document with ID {}", id);
 

@@ -10,11 +10,13 @@ import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 @Configuration
 public class RabbitMQConfig {
 
     public static final String OCR_RESULTS_EXCHANGE = "ocr.results";
     public static final String OCR_RESULTS_GENAI_QUEUE = "ocr.results.genai";
+    public static final String GENAI_RESULTS_QUEUE = "genai.results";
 
     @Bean
     public FanoutExchange ocrResultsExchange() {
@@ -27,8 +29,13 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding ocrResultsGenaiBinding(Queue ocrResultsGenaiQueue, FanoutExchange ocrResultsExchange) {
-        return BindingBuilder.bind(ocrResultsGenaiQueue).to(ocrResultsExchange);
+    public Binding ocrResultsGenaiBinding() {
+        return BindingBuilder.bind(ocrResultsGenaiQueue()).to(ocrResultsExchange());
+    }
+
+    @Bean
+    public Queue genaiResultsQueue() {
+        return new Queue(GENAI_RESULTS_QUEUE, false);
     }
 
     @Bean

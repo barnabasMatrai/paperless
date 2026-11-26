@@ -31,6 +31,19 @@ public class RabbitMQConfig {
      */
     public static final String OCR_RESULTS_INDEX_QUEUE = "ocr.results.index";
 
+
+    /**
+     * Queue, auf die der GenAI-Worker die fertigen Zusammenfassungen legt.
+     * Wird hier (Consumer) und im GenAI-Worker (Publisher) mit identischen
+     * Parametern deklariert, damit die Startreihenfolge egal ist.
+     */
+    public static final String GENAI_RESULTS_QUEUE = "genai.results";
+
+    @Bean
+    public Queue genaiResultsQueue() {
+        return new Queue(GENAI_RESULTS_QUEUE, false);
+    }
+
     @Bean
     public Queue ocrQueue() {
         return new Queue(OCR_QUEUE, false);

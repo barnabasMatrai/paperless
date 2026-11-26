@@ -5,10 +5,10 @@ import at.technikum.genaiworker.genai.GenAiException;
 import at.technikum.genaiworker.genai.GeminiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-
 
 @Slf4j
 @Component
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class OcrResultListener {
 
     private final GeminiClient geminiClient;
+    private final SummaryResultPublisher summaryResultPublisher;
 
     @RabbitListener(queues = RabbitMQConfig.OCR_RESULTS_GENAI_QUEUE)
     public void onMessage(OcrDocumentEvent event) {
@@ -45,12 +46,17 @@ public class OcrResultListener {
                     "Summary generation failed for document ID " + documentId, e);
         }
 
-        log.info("Summary for document ID {} created ({} characters): {}", documentId, summary.length(), summary);
+        log.info("Summary for document ID {} created ({} characters)", documentId, summary.length());
+        log.debug("Summary for document ID {}: {}", documentId, summary);
 
-        // Aufgabe 4: Zusammenfassung an die REST-API übergeben und in der DB speichern.
+        try {
+            summaryResultPublisher.publish(new SummaryResultEvent(documentId, summary));
+        } catch (AmqpException e) {
+            log.error("Could not publish summary for document ID {}: {}", documentId, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(
+                    "Publishing summary failed for document ID " + documentId, e);
+        }
 
         log.info("Finished processing OCR result for document ID {}", documentId);
-
-
     }
 }

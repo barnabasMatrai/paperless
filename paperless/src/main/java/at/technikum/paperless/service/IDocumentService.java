@@ -17,7 +17,11 @@ public interface IDocumentService {
 
     Document update(Long id, Document updatedDocument);
 
+    Document saveSummary(Long id, String summary);
+
     List<Document> search(Long userId, String query);
 
     void deleteById(Long id);
+
+
 }
