@@ -191,7 +191,7 @@ export class UploadDocumentComponent implements OnInit {
     const metadata = { filename: filename.trim(), type: type as DocumentType };
 
     const request = existing
-      ? this.documentService.update(existing.id, { ...metadata, uploadDate: existing.uploadDate })
+      ? this.documentService.update(existing.id, { ...metadata })
       : this.documentService.upload(this.file()!, metadata);
 
     request

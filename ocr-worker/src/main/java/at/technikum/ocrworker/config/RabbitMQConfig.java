@@ -1,6 +1,7 @@
 
 package at.technikum.ocrworker.config;
 
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -13,9 +14,11 @@ public class RabbitMQConfig {
 
     public static final String OCR_QUEUE = "ocr.queue";
 
+    public static final String OCR_RESULTS_EXCHANGE = "ocr.results";
+
     @Bean
-    public Queue ocrQueue() {
-        return new Queue(OCR_QUEUE, false);
+    public FanoutExchange ocrResultsExchange() {
+        return new FanoutExchange(OCR_RESULTS_EXCHANGE, false, false);
     }
 
     @Bean

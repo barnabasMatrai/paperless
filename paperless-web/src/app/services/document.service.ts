@@ -28,7 +28,7 @@ export class DocumentService {
     return this.http.get<DocumentPublic[]>(`${this.baseUrl}/search`, { params });
   }
 
-  update(id: number, document: DocumentCreate): Observable<DocumentPublic> {
+  update(id: number, document: DocumentUpload): Observable<DocumentPublic> {
     return this.http.put<DocumentPublic>(`${this.baseUrl}/${id}`, document);
   }
 

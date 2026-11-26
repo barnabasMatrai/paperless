@@ -32,6 +32,12 @@ services:
         condition: service_started
       elasticsearch:
         condition: service_healthy
+      # Erst starten, damit die ocr.results-Exchange (Fanout) des OCR-Workers
+      # existiert, bevor die Queue ocr.results.index und die Bindung angelegt
+      # werden. Deklariert wird die Exchange einmalig durch den OCR-Worker,
+      # die Queue und Bindung hier (vgl. RabbitMQConfig in der paperless-API).
+      ocr-worker:
+        condition: service_started
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -108,6 +114,27 @@ services:
       MINIO_BUCKET: documents
 
       ELASTICSEARCH_URIS: http://elasticsearch:9200
+
+  # --- GenAI-Worker: fasst OCR-Ergebnisse mit Google Gemini zusammen ------------------------
+  genai-worker:
+    build:
+      context: ../genai-worker
+      dockerfile: Dockerfile
+    container_name: paperless-genai-worker
+    restart: unless-stopped
+    depends_on:
+      paperless-mq:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: paperless-mq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: paperless-mq
+      SPRING_RABBITMQ_PASSWORD: paperless-mq
+      SPRING_RABBITMQ_VIRTUAL_HOST: paperless
+
+      # Wird aus der Datei .env neben dieser docker-compose.yml gelesen (nicht ins Repo committen)
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
 
   # --- Infrastructure: MinIO (Object Storage) ------------------------------------------------
   minio:

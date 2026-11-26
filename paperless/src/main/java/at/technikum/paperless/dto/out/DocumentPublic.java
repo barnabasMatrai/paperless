@@ -11,4 +11,5 @@ public class DocumentPublic {
     private DocumentType type;
     private Instant uploadDate;
     private ReminderPublic reminder;
+    private String summary;
 }

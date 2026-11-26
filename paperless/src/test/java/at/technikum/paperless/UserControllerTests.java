@@ -1,20 +1,23 @@
 package at.technikum.paperless;
 
+import at.technikum.paperless.config.SecurityConfig;
 import at.technikum.paperless.dto.in.AuthCreate;
 import at.technikum.paperless.dto.in.UserRegisterCreate;
 import at.technikum.paperless.dto.out.AuthPublic;
 import at.technikum.paperless.dto.out.UserLoginPublic;
 import at.technikum.paperless.dto.out.UserPublic;
+import at.technikum.paperless.search.OcrDocumentRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import at.technikum.paperless.config.SecurityConfig;
-import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
@@ -24,6 +27,12 @@ import java.util.List;
 @AutoConfigureWebTestClient
 @Import(SecurityConfig.class)
 public class UserControllerTests {
+
+    @MockitoBean
+    private OcrDocumentRepository ocrDocumentRepository;
+
+    @MockitoBean
+    private RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry;
 
     @Test
     void get_users_without_token_returns_unauthorized(
